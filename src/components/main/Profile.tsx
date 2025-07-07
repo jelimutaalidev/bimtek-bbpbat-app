@@ -82,27 +82,27 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
     const newErrors: Record<string, string> = {};
 
     // Personal Info validation
-    if (!formData.namaLengkap.trim()) {
+    if (!formData.namaLengkap?.trim()) {
       newErrors.namaLengkap = 'Nama lengkap wajib diisi';
     }
-    if (!formData.email.trim()) {
+    if (!formData.email?.trim()) {
       newErrors.email = 'Email wajib diisi';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Format email tidak valid';
     }
-    if (!formData.alamat.trim()) {
+    if (!formData.alamat?.trim()) {
       newErrors.alamat = 'Alamat wajib diisi';
     }
-    if (!formData.noTelepon.trim()) {
+    if (!formData.noTelepon?.trim()) {
       newErrors.noTelepon = 'Nomor telepon wajib diisi';
     }
-    if (!formData.namaOrangTua.trim()) {
+    if (!formData.namaOrangTua?.trim()) {
       newErrors.namaOrangTua = 'Nama orang tua/wali wajib diisi';
     }
-    if (!formData.noTeleponOrangTua.trim()) {
+    if (!formData.noTeleponOrangTua?.trim()) {
       newErrors.noTeleponOrangTua = 'Nomor telepon orang tua/wali wajib diisi';
     }
-    if (!formData.tempatLahir.trim()) {
+    if (!formData.tempatLahir?.trim()) {
       newErrors.tempatLahir = 'Tempat lahir wajib diisi';
     }
     if (!formData.tanggalLahir) {
@@ -113,28 +113,28 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
     }
 
     // Institution Info validation
-    if (!formData.namaInstitusi.trim()) {
+    if (!formData.namaInstitusi?.trim()) {
       newErrors.namaInstitusi = 'Nama institusi wajib diisi';
     }
-    if (!formData.nomorInduk.trim()) {
+    if (!formData.nomorInduk?.trim()) {
       newErrors.nomorInduk = 'Nomor induk wajib diisi';
     }
-    if (!formData.alamatInstitusi.trim()) {
+    if (!formData.alamatInstitusi?.trim()) {
       newErrors.alamatInstitusi = 'Alamat institusi wajib diisi';
     }
-    if (!formData.emailInstitusi.trim()) {
+    if (!formData.emailInstitusi?.trim()) {
       newErrors.emailInstitusi = 'Email institusi wajib diisi';
     }
-    if (!formData.noTeleponInstitusi.trim()) {
+    if (!formData.noTeleponInstitusi?.trim()) {
       newErrors.noTeleponInstitusi = 'Nomor telepon institusi wajib diisi';
     }
-    if (!formData.namaPembimbing.trim()) {
+    if (!formData.namaPembimbing?.trim()) {
       newErrors.namaPembimbing = 'Nama pembimbing wajib diisi';
     }
-    if (!formData.noTeleponPembimbing.trim()) {
+    if (!formData.noTeleponPembimbing?.trim()) {
       newErrors.noTeleponPembimbing = 'Nomor telepon pembimbing wajib diisi';
     }
-    if (!formData.emailPembimbing.trim()) {
+    if (!formData.emailPembimbing?.trim()) {
       newErrors.emailPembimbing = 'Email pembimbing wajib diisi';
     }
 
@@ -150,10 +150,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
     }
 
     // Health Info validation
-    if (!formData.riwayatPenyakit.trim()) {
+    if (!formData.riwayatPenyakit?.trim()) {
       newErrors.riwayatPenyakit = 'Riwayat penyakit wajib diisi';
     }
-    if (!formData.penangananKhusus.trim()) {
+    if (!formData.penangananKhusus?.trim()) {
       newErrors.penangananKhusus = 'Penanganan khusus wajib diisi';
     }
 
@@ -223,10 +223,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="text"
             name="namaLengkap"
-            value={formData.namaLengkap}
+            value={formData.namaLengkap || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaLengkap ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Masukkan nama lengkap"
@@ -245,10 +244,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="email"
             name="email"
-            value={formData.email}
+            value={formData.email || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.email ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="john.doe@email.com"
@@ -268,11 +266,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
         </label>
         <textarea
           name="alamat"
-          value={formData.alamat}
+          value={formData.alamat || ''}
           onChange={handleInputChange}
-          disabled={!isEditing}
           rows={3}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.alamat ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder="Masukkan alamat lengkap"
@@ -293,10 +290,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="tel"
             name="noTelepon"
-            value={formData.noTelepon}
+            value={formData.noTelepon || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTelepon ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="+62 812 3456 7890"
@@ -315,10 +311,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="text"
             name="namaOrangTua"
-            value={formData.namaOrangTua}
+            value={formData.namaOrangTua || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaOrangTua ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Nama orang tua/wali"
@@ -340,10 +335,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="tel"
             name="noTeleponOrangTua"
-            value={formData.noTeleponOrangTua}
+            value={formData.noTeleponOrangTua || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTeleponOrangTua ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="+62 812 3456 7890"
@@ -362,10 +356,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="text"
             name="tempatLahir"
-            value={formData.tempatLahir}
+            value={formData.tempatLahir || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.tempatLahir ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Kota tempat lahir"
@@ -384,10 +377,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="date"
             name="tanggalLahir"
-            value={formData.tanggalLahir}
+            value={formData.tanggalLahir || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.tanggalLahir ? 'border-red-300' : 'border-gray-300'
             }`}
           />
@@ -407,10 +399,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           </label>
           <select
             name="golonganDarah"
-            value={formData.golonganDarah}
+            value={formData.golonganDarah || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.golonganDarah ? 'border-red-300' : 'border-gray-300'
             }`}
           >
@@ -441,10 +432,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="text"
             name="namaInstitusi"
-            value={formData.namaInstitusi}
+            value={formData.namaInstitusi || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaInstitusi ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Nama institusi"
@@ -463,10 +453,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="text"
             name="nomorInduk"
-            value={formData.nomorInduk}
+            value={formData.nomorInduk || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.nomorInduk ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="NIS/NIM"
@@ -486,11 +475,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
         </label>
         <textarea
           name="alamatInstitusi"
-          value={formData.alamatInstitusi}
+          value={formData.alamatInstitusi || ''}
           onChange={handleInputChange}
-          disabled={!isEditing}
           rows={3}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.alamatInstitusi ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder="Alamat lengkap institusi"
@@ -511,10 +499,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="email"
             name="emailInstitusi"
-            value={formData.emailInstitusi}
+            value={formData.emailInstitusi || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.emailInstitusi ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="email@institusi.ac.id"
@@ -533,10 +520,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="tel"
             name="noTeleponInstitusi"
-            value={formData.noTeleponInstitusi}
+            value={formData.noTeleponInstitusi || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTeleponInstitusi ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="+62 21 1234 5678"
@@ -558,10 +544,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="text"
             name="namaPembimbing"
-            value={formData.namaPembimbing}
+            value={formData.namaPembimbing || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaPembimbing ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="Nama pembimbing"
@@ -580,10 +565,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="tel"
             name="noTeleponPembimbing"
-            value={formData.noTeleponPembimbing}
+            value={formData.noTeleponPembimbing || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTeleponPembimbing ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="+62 812 3456 7890"
@@ -602,10 +586,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="email"
             name="emailPembimbing"
-            value={formData.emailPembimbing}
+            value={formData.emailPembimbing || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.emailPembimbing ? 'border-red-300' : 'border-gray-300'
             }`}
             placeholder="pembimbing@email.com"
@@ -631,10 +614,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="date"
             name="rencanaMultai"
-            value={formData.rencanaMultai}
+            value={formData.rencanaMultai || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.rencanaMultai ? 'border-red-300' : 'border-gray-300'
             }`}
           />
@@ -652,10 +634,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="date"
             name="rencanaAkhir"
-            value={formData.rencanaAkhir}
+            value={formData.rencanaAkhir || ''}
             onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.rencanaAkhir ? 'border-red-300' : 'border-gray-300'
             }`}
           />
@@ -674,10 +655,9 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
         </label>
         <select
           name="penempatanPKL"
-          value={formData.penempatanPKL}
+          value={formData.penempatanPKL || ''}
           onChange={handleInputChange}
-          disabled={!isEditing}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.penempatanPKL ? 'border-red-300' : 'border-gray-300'
           }`}
         >
@@ -708,13 +688,12 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           <input
             type="file"
             accept=".pdf,.jpg,.jpeg,.png"
-            disabled={!isEditing}
             className="hidden"
             id="bpjs-upload"
           />
           <label
             htmlFor="bpjs-upload"
-            className={`cursor-pointer ${!isEditing ? 'cursor-not-allowed opacity-50' : ''}`}
+            className="cursor-pointer"
           >
             <div className="text-gray-400 mb-2">
               <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -737,11 +716,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
         </label>
         <textarea
           name="riwayatPenyakit"
-          value={formData.riwayatPenyakit}
+          value={formData.riwayatPenyakit || ''}
           onChange={handleInputChange}
-          disabled={!isEditing}
           rows={4}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.riwayatPenyakit ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder="Tuliskan riwayat penyakit dalam 2 tahun terakhir. Jika tidak ada, tulis 'Tidak ada'"
@@ -760,11 +738,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
         </label>
         <textarea
           name="penangananKhusus"
-          value={formData.penangananKhusus}
+          value={formData.penangananKhusus || ''}
           onChange={handleInputChange}
-          disabled={!isEditing}
           rows={3}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-colors ${
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.penangananKhusus ? 'border-red-300' : 'border-gray-300'
           }`}
           placeholder="Tuliskan jika ada penanganan khusus yang diperlukan. Jika tidak ada, tulis 'Tidak ada'"
