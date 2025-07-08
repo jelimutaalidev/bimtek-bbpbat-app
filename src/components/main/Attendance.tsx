@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Clock, CheckCircle, XCircle, AlertCircle, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, CheckCircle, XCircle, AlertCircle, Calendar, MapPin, Navigation, Loader } from 'lucide-react';
 
 interface AttendanceProps {
   userData: {
@@ -17,15 +17,130 @@ const Attendance: React.FC<AttendanceProps> = ({ userData }) => {
     status: null as 'hadir' | 'izin' | 'sakit' | null
   });
 
+  const [locationStatus, setLocationStatus] = useState({
+    loading: false,
+    allowed: false,
+    inRange: false,
+    distance: null as number | null,
+    error: null as string | null,
+    coordinates: null as { lat: number; lng: number } | null
+  });
+
+  // Koordinat BBPBAT (contoh koordinat - sesuaikan dengan lokasi sebenarnya)
+  const BBPBAT_LOCATION = {
+    lat: -6.9175, // Contoh koordinat Jakarta
+    lng: 107.6191,
+    name: "BBPBAT Sukabumi",
+    radius: 100 // radius dalam meter
+  };
+
   const attendanceHistory = [
-    { date: '2025-01-15', checkIn: '08:00', checkOut: '16:00', status: 'hadir' },
-    { date: '2025-01-14', checkIn: '08:15', checkOut: '16:05', status: 'hadir' },
-    { date: '2025-01-13', checkIn: null, checkOut: null, status: 'sakit' },
-    { date: '2025-01-12', checkIn: '08:00', checkOut: '16:00', status: 'hadir' },
-    { date: '2025-01-11', checkIn: '08:30', checkOut: '16:10', status: 'hadir' },
+    { date: '2025-01-15', checkIn: '08:00', checkOut: '16:00', status: 'hadir', location: 'BBPBAT' },
+    { date: '2025-01-14', checkIn: '08:15', checkOut: '16:05', status: 'hadir', location: 'BBPBAT' },
+    { date: '2025-01-13', checkIn: null, checkOut: null, status: 'sakit', location: null },
+    { date: '2025-01-12', checkIn: '08:00', checkOut: '16:00', status: 'hadir', location: 'BBPBAT' },
+    { date: '2025-01-11', checkIn: '08:30', checkOut: '16:10', status: 'hadir', location: 'BBPBAT' },
   ];
 
+  // Fungsi untuk menghitung jarak antara dua koordinat (Haversine formula)
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lng2-lng1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c; // Distance in meters
+  };
+
+  // Fungsi untuk mendapatkan lokasi user
+  const getCurrentLocation = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation tidak didukung oleh browser ini'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        resolve,
+        reject,
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+      );
+    });
+  };
+
+  // Fungsi untuk memeriksa lokasi
+  const checkLocation = async () => {
+    setLocationStatus(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const position = await getCurrentLocation();
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+      
+      const distance = calculateDistance(
+        userLat, 
+        userLng, 
+        BBPBAT_LOCATION.lat, 
+        BBPBAT_LOCATION.lng
+      );
+
+      const inRange = distance <= BBPBAT_LOCATION.radius;
+
+      setLocationStatus({
+        loading: false,
+        allowed: true,
+        inRange,
+        distance: Math.round(distance),
+        error: null,
+        coordinates: { lat: userLat, lng: userLng }
+      });
+
+    } catch (error: any) {
+      let errorMessage = 'Gagal mendapatkan lokasi';
+      
+      if (error.code === 1) {
+        errorMessage = 'Akses lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.';
+      } else if (error.code === 2) {
+        errorMessage = 'Lokasi tidak tersedia. Pastikan GPS aktif.';
+      } else if (error.code === 3) {
+        errorMessage = 'Timeout mendapatkan lokasi. Coba lagi.';
+      }
+
+      setLocationStatus({
+        loading: false,
+        allowed: false,
+        inRange: false,
+        distance: null,
+        error: errorMessage,
+        coordinates: null
+      });
+    }
+  };
+
+  // Auto-check location saat component mount
+  useEffect(() => {
+    if (userData.profileComplete && userData.documentsComplete) {
+      checkLocation();
+    }
+  }, [userData.profileComplete, userData.documentsComplete]);
+
   const handleAttendance = (type: 'check-in' | 'check-out', status: 'hadir' | 'izin' | 'sakit') => {
+    // Untuk status hadir, harus di dalam area
+    if (status === 'hadir' && !locationStatus.inRange) {
+      alert('Anda harus berada di area BBPBAT untuk melakukan absensi hadir!');
+      return;
+    }
+
     const now = new Date();
     const timeString = now.toLocaleTimeString('id-ID', { 
       hour: '2-digit', 
@@ -127,7 +242,91 @@ const Attendance: React.FC<AttendanceProps> = ({ userData }) => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Absensi</h1>
-        <p className="text-gray-600">Kelola kehadiran harian Anda</p>
+        <p className="text-gray-600">Kelola kehadiran harian Anda dengan verifikasi lokasi</p>
+      </div>
+
+      {/* Location Status */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="w-5 h-5 text-blue-600" />
+          <h2 className="text-lg font-semibold text-gray-800">Status Lokasi</h2>
+          <button
+            onClick={checkLocation}
+            disabled={locationStatus.loading}
+            className="ml-auto bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center gap-2"
+          >
+            {locationStatus.loading ? (
+              <>
+                <Loader className="w-4 h-4 animate-spin" />
+                Mengecek...
+              </>
+            ) : (
+              <>
+                <Navigation className="w-4 h-4" />
+                Refresh Lokasi
+              </>
+            )}
+          </button>
+        </div>
+
+        {locationStatus.loading && (
+          <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+            <Loader className="w-5 h-5 text-blue-600 animate-spin" />
+            <span className="text-blue-700">Mendapatkan lokasi Anda...</span>
+          </div>
+        )}
+
+        {locationStatus.error && (
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+            <div>
+              <p className="text-red-700 font-medium">Gagal Mendapatkan Lokasi</p>
+              <p className="text-red-600 text-sm">{locationStatus.error}</p>
+            </div>
+          </div>
+        )}
+
+        {locationStatus.allowed && !locationStatus.loading && (
+          <div className="space-y-4">
+            <div className={`p-4 rounded-lg border ${
+              locationStatus.inRange 
+                ? 'bg-green-50 border-green-200' 
+                : 'bg-red-50 border-red-200'
+            }`}>
+              <div className="flex items-center gap-3 mb-2">
+                {locationStatus.inRange ? (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-red-600" />
+                )}
+                <span className={`font-medium ${
+                  locationStatus.inRange ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {locationStatus.inRange ? 'Anda berada di area BBPBAT' : 'Anda berada di luar area BBPBAT'}
+                </span>
+              </div>
+              <div className="text-sm space-y-1">
+                <p className={locationStatus.inRange ? 'text-green-700' : 'text-red-700'}>
+                  <strong>Jarak dari BBPBAT:</strong> {locationStatus.distance} meter
+                </p>
+                <p className={locationStatus.inRange ? 'text-green-700' : 'text-red-700'}>
+                  <strong>Lokasi:</strong> {BBPBAT_LOCATION.name}
+                </p>
+                <p className={locationStatus.inRange ? 'text-green-700' : 'text-red-700'}>
+                  <strong>Radius yang diizinkan:</strong> {BBPBAT_LOCATION.radius} meter
+                </p>
+              </div>
+            </div>
+
+            {locationStatus.coordinates && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  <strong>Koordinat Anda:</strong> {locationStatus.coordinates.lat.toFixed(6)}, {locationStatus.coordinates.lng.toFixed(6)}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Today's Attendance */}
@@ -164,6 +363,11 @@ const Attendance: React.FC<AttendanceProps> = ({ userData }) => {
                           Waktu: {todayAttendance.checkIn}
                         </p>
                       )}
+                      {todayAttendance.status === 'hadir' && locationStatus.distance && (
+                        <p className="text-xs text-green-600">
+                          Lokasi: {locationStatus.distance}m dari BBPBAT
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -171,10 +375,14 @@ const Attendance: React.FC<AttendanceProps> = ({ userData }) => {
                 <div className="space-y-3">
                   <button
                     onClick={() => handleAttendance('check-in', 'hadir')}
-                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                    disabled={!locationStatus.inRange}
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Hadir
+                    {!locationStatus.inRange && (
+                      <span className="text-xs">(Perlu di area BBPBAT)</span>
+                    )}
                   </button>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -208,16 +416,25 @@ const Attendance: React.FC<AttendanceProps> = ({ userData }) => {
                       <p className="text-sm text-blue-600">
                         Waktu: {todayAttendance.checkOut}
                       </p>
+                      {locationStatus.distance && (
+                        <p className="text-xs text-blue-600">
+                          Lokasi: {locationStatus.distance}m dari BBPBAT
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
               ) : todayAttendance.status === 'hadir' ? (
                 <button
                   onClick={() => handleAttendance('check-out', 'hadir')}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  disabled={!locationStatus.inRange}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   <Clock className="w-4 h-4" />
                   Absen Keluar
+                  {!locationStatus.inRange && (
+                    <span className="text-xs">(Perlu di area BBPBAT)</span>
+                  )}
                 </button>
               ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -252,6 +469,12 @@ const Attendance: React.FC<AttendanceProps> = ({ userData }) => {
                       )}
                       {record.checkOut && (
                         <span>Keluar: {record.checkOut}</span>
+                      )}
+                      {record.location && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {record.location}
+                        </span>
                       )}
                     </div>
                   </div>
