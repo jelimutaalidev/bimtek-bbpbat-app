@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, LogIn, AlertCircle, MessageCircle, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, LogIn, AlertCircle, MessageCircle, Eye, EyeOff, GraduationCap, Users } from 'lucide-react';
 import { NavigationState } from '../App';
 
 interface LoginPageProps {
@@ -15,16 +15,40 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [detectedUserType, setDetectedUserType] = useState<'pelajar' | 'umum' | null>(null);
 
-  // Demo credentials
+  // Demo credentials untuk berbagai jenis user
   const demoCredentials = {
-    username: 'peserta001',
-    accessCode: 'BBPBAT2025'
+    pelajar: {
+      username: 'pelajar001',
+      accessCode: 'BBPBAT2025'
+    },
+    umum: {
+      username: 'umum001', 
+      accessCode: 'BBPBAT2025'
+    }
+  };
+
+  // Fungsi untuk mendeteksi jenis user berdasarkan username
+  const detectUserType = (username: string): 'pelajar' | 'umum' | null => {
+    if (username.toLowerCase().startsWith('pelajar')) {
+      return 'pelajar';
+    } else if (username.toLowerCase().startsWith('umum') || username.toLowerCase().startsWith('dinas')) {
+      return 'umum';
+    }
+    return null;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Deteksi jenis user saat username diketik
+    if (name === 'username') {
+      const userType = detectUserType(value);
+      setDetectedUserType(userType);
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -56,8 +80,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
     
     // Simulate API call
     setTimeout(() => {
-      if (formData.username === demoCredentials.username && 
-          formData.accessCode === demoCredentials.accessCode) {
+      const userType = detectUserType(formData.username);
+      let isValidCredentials = false;
+
+      // Check credentials based on detected user type
+      if (userType === 'pelajar') {
+        isValidCredentials = formData.username === demoCredentials.pelajar.username && 
+                           formData.accessCode === demoCredentials.pelajar.accessCode;
+      } else if (userType === 'umum') {
+        isValidCredentials = formData.username === demoCredentials.umum.username && 
+                           formData.accessCode === demoCredentials.umum.accessCode;
+      }
+
+      if (isValidCredentials) {
         onLogin(true);
         onNavigate('main');
       } else {
@@ -68,6 +103,29 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
       setIsSubmitting(false);
     }, 1500);
   };
+
+  const getUserTypeInfo = (type: 'pelajar' | 'umum' | null) => {
+    switch (type) {
+      case 'pelajar':
+        return {
+          icon: <GraduationCap className="w-5 h-5 text-blue-600" />,
+          label: 'Pelajar/Mahasiswa',
+          description: 'Akses untuk peserta dari institusi pendidikan',
+          color: 'border-blue-200 bg-blue-50'
+        };
+      case 'umum':
+        return {
+          icon: <Users className="w-5 h-5 text-teal-600" />,
+          label: 'Masyarakat Umum/Dinas',
+          description: 'Akses untuk peserta umum dan instansi pemerintah',
+          color: 'border-teal-200 bg-teal-50'
+        };
+      default:
+        return null;
+    }
+  };
+
+  const userTypeInfo = getUserTypeInfo(detectedUserType);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,12 +157,43 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
             </p>
           </div>
 
+          {/* User Type Detection */}
+          {userTypeInfo && (
+            <div className={`rounded-lg p-4 border mb-6 ${userTypeInfo.color}`}>
+              <div className="flex items-center gap-3">
+                {userTypeInfo.icon}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-800">{userTypeInfo.label}</h3>
+                  <p className="text-xs text-gray-600">{userTypeInfo.description}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Demo Credentials Info */}
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-6">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h3>
-            <div className="text-sm text-blue-700 space-y-1">
-              <p><strong>Username:</strong> peserta001</p>
-              <p><strong>Kode Akses:</strong> BBPBAT2025</p>
+            <h3 className="text-sm font-medium text-blue-800 mb-3">Demo Credentials:</h3>
+            <div className="space-y-3">
+              <div className="bg-white rounded p-3 border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <GraduationCap className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">Pelajar/Mahasiswa</span>
+                </div>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <p><strong>Username:</strong> pelajar001</p>
+                  <p><strong>Kode Akses:</strong> BBPBAT2025</p>
+                </div>
+              </div>
+              <div className="bg-white rounded p-3 border border-teal-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="w-4 h-4 text-teal-600" />
+                  <span className="text-sm font-medium text-teal-800">Masyarakat Umum/Dinas</span>
+                </div>
+                <div className="text-sm text-teal-700 space-y-1">
+                  <p><strong>Username:</strong> umum001</p>
+                  <p><strong>Kode Akses:</strong> BBPBAT2025</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -135,7 +224,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                     errors.username ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Masukkan username Anda"
+                  placeholder="Contoh: pelajar001 atau umum001"
                 />
                 {errors.username && (
                   <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
@@ -143,6 +232,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
                     {errors.username}
                   </p>
                 )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Format: pelajar001 (untuk pelajar) atau umum001 (untuk masyarakat umum/dinas)
+                </p>
               </div>
 
               {/* Access Code */}
@@ -210,9 +302,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
                   Belum Memiliki Akun?
                 </h3>
                 <p className="text-sm text-orange-700">
-                  Username dan kode akses akan dikirim melalui WhatsApp setelah pengajuan pendaftaran Anda diterima oleh admin.
+                  Username dan kode akses akan dikirim melalui WhatsApp setelah pengajuan pendaftaran Anda diterima oleh admin. 
+                  Sistem akan otomatis mendeteksi jenis akun berdasarkan format username yang diberikan.
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Username Format Guide */}
+          <div className="mt-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-medium text-gray-800 mb-2">Format Username:</h3>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p><strong>pelajar001, pelajar002, ...</strong> → Akun Pelajar/Mahasiswa</p>
+              <p><strong>umum001, umum002, ...</strong> → Akun Masyarakat Umum</p>
+              <p><strong>dinas001, dinas002, ...</strong> → Akun Instansi/Dinas</p>
             </div>
           </div>
         </div>
