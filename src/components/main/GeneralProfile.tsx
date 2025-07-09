@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { User, Building, Calendar, Heart, Save, Edit, AlertCircle, CheckCircle, Mail, Phone, MapPin, FileText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { User, Building, Calendar, Heart, Save, Edit, AlertCircle, CheckCircle, Mail, Phone, MapPin } from 'lucide-react';
 
 interface GeneralProfileProps {
   userData: {
@@ -49,12 +49,10 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     'KODOK LEMBU'
   ];
 
-  // Local state untuk form data - tidak sync dengan global state saat editing
-  const [formData, setFormData] = useState(profileData);
+  // Local state untuk form - TIDAK terhubung dengan global state saat editing
+  const [localFormData, setLocalFormData] = useState(profileData);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // Ref untuk menyimpan data awal saat mulai edit
-  const initialDataRef = useRef(profileData);
+  const originalDataRef = useRef(profileData);
 
   const tabs = [
     { id: 'personal', label: 'Informasi Pribadi', icon: <User className="w-4 h-4" /> },
@@ -63,21 +61,22 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     { id: 'health', label: 'Informasi Kesehatan', icon: <Heart className="w-4 h-4" /> }
   ];
 
-  // Sync dengan global state hanya saat tidak editing
+  // Sync hanya saat tidak editing
   useEffect(() => {
     if (!isEditing) {
-      setFormData(profileData);
-      initialDataRef.current = profileData;
+      setLocalFormData(profileData);
+      originalDataRef.current = profileData;
     }
   }, [profileData, isEditing]);
 
+  // Handler untuk input - HANYA update local state
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Update local state saja, jangan update global state
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // HANYA update local state, jangan sentuh global state
+    setLocalFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear error when user starts typing
+    // Clear error
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -87,57 +86,57 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     const newErrors: Record<string, string> = {};
 
     // Personal Info validation
-    if (!formData.namaLengkap?.trim()) {
+    if (!localFormData.namaLengkap?.trim()) {
       newErrors.namaLengkap = 'Nama lengkap wajib diisi';
     }
-    if (!formData.email?.trim()) {
+    if (!localFormData.email?.trim()) {
       newErrors.email = 'Email wajib diisi';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(localFormData.email)) {
       newErrors.email = 'Format email tidak valid';
     }
-    if (!formData.alamat?.trim()) {
+    if (!localFormData.alamat?.trim()) {
       newErrors.alamat = 'Alamat wajib diisi';
     }
-    if (!formData.noTelepon?.trim()) {
+    if (!localFormData.noTelepon?.trim()) {
       newErrors.noTelepon = 'Nomor telepon wajib diisi';
     }
-    if (!formData.tempatLahir?.trim()) {
+    if (!localFormData.tempatLahir?.trim()) {
       newErrors.tempatLahir = 'Tempat lahir wajib diisi';
     }
-    if (!formData.tanggalLahir) {
+    if (!localFormData.tanggalLahir) {
       newErrors.tanggalLahir = 'Tanggal lahir wajib diisi';
     }
-    if (!formData.golonganDarah) {
+    if (!localFormData.golonganDarah) {
       newErrors.golonganDarah = 'Golongan darah wajib dipilih';
     }
 
     // Institution Info validation
-    if (!formData.namaInstitusi?.trim()) {
+    if (!localFormData.namaInstitusi?.trim()) {
       newErrors.namaInstitusi = 'Nama institusi wajib diisi';
     }
-    if (!formData.alamatInstitusi?.trim()) {
+    if (!localFormData.alamatInstitusi?.trim()) {
       newErrors.alamatInstitusi = 'Alamat institusi wajib diisi';
     }
-    if (!formData.emailInstitusi?.trim()) {
+    if (!localFormData.emailInstitusi?.trim()) {
       newErrors.emailInstitusi = 'Email institusi wajib diisi';
     }
 
     // Bimtek Plan validation
-    if (!formData.rencanaMultai) {
+    if (!localFormData.rencanaMultai) {
       newErrors.rencanaMultai = 'Rencana mulai bimtek wajib diisi';
     }
-    if (!formData.rencanaAkhir) {
+    if (!localFormData.rencanaAkhir) {
       newErrors.rencanaAkhir = 'Rencana akhir bimtek wajib diisi';
     }
-    if (!formData.penempatanPKL) {
+    if (!localFormData.penempatanPKL) {
       newErrors.penempatanPKL = 'Penempatan bimtek wajib dipilih';
     }
 
     // Health Info validation
-    if (!formData.riwayatPenyakit?.trim()) {
+    if (!localFormData.riwayatPenyakit?.trim()) {
       newErrors.riwayatPenyakit = 'Riwayat penyakit wajib diisi';
     }
-    if (!formData.penangananKhusus?.trim()) {
+    if (!localFormData.penangananKhusus?.trim()) {
       newErrors.penangananKhusus = 'Penanganan khusus wajib diisi';
     }
 
@@ -166,16 +165,16 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
 
     // Simulate API call
     setTimeout(() => {
-      // Update global state hanya saat save
-      updateProfileData(formData);
+      // Update global state HANYA saat save berhasil
+      updateProfileData(localFormData);
+      
+      // Update profile completion status
+      const isComplete = checkProfileCompletion(localFormData);
+      updateUserData({ profileComplete: isComplete });
       
       setIsSaving(false);
       setIsEditing(false);
       setSaveMessage('Profil berhasil disimpan!');
-      
-      // Update profile completion status
-      const isComplete = checkProfileCompletion(formData);
-      updateUserData({ profileComplete: isComplete });
       
       // Clear success message after 3 seconds
       setTimeout(() => {
@@ -188,16 +187,16 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setIsEditing(true);
     setSaveMessage('');
     setErrors({});
-    // Simpan data awal saat mulai edit
-    initialDataRef.current = { ...formData };
+    // Simpan data original saat mulai edit
+    originalDataRef.current = { ...localFormData };
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setSaveMessage('');
     setErrors({});
-    // Reset ke data awal
-    setFormData(initialDataRef.current);
+    // Reset ke data original
+    setLocalFormData(originalDataRef.current);
   };
 
   const renderPersonalInfo = () => (
@@ -210,7 +209,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="text"
             name="namaLengkap"
-            value={formData.namaLengkap || ''}
+            value={localFormData.namaLengkap || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -232,7 +231,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="email"
             name="email"
-            value={formData.email || ''}
+            value={localFormData.email || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -255,7 +254,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         </label>
         <textarea
           name="alamat"
-          value={formData.alamat || ''}
+          value={localFormData.alamat || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           rows={3}
@@ -280,7 +279,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="tel"
             name="noTelepon"
-            value={formData.noTelepon || ''}
+            value={localFormData.noTelepon || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -302,7 +301,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="text"
             name="tempatLahir"
-            value={formData.tempatLahir || ''}
+            value={localFormData.tempatLahir || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -324,7 +323,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="date"
             name="tanggalLahir"
-            value={formData.tanggalLahir || ''}
+            value={localFormData.tanggalLahir || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -347,7 +346,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           </label>
           <select
             name="golonganDarah"
-            value={formData.golonganDarah || ''}
+            value={localFormData.golonganDarah || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -380,7 +379,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         <input
           type="text"
           name="namaInstitusi"
-          value={formData.namaInstitusi || ''}
+          value={localFormData.namaInstitusi || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -402,7 +401,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         </label>
         <textarea
           name="alamatInstitusi"
-          value={formData.alamatInstitusi || ''}
+          value={localFormData.alamatInstitusi || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           rows={3}
@@ -426,7 +425,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         <input
           type="email"
           name="emailInstitusi"
-          value={formData.emailInstitusi || ''}
+          value={localFormData.emailInstitusi || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -454,7 +453,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="date"
             name="rencanaMultai"
-            value={formData.rencanaMultai || ''}
+            value={localFormData.rencanaMultai || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -475,7 +474,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
           <input
             type="date"
             name="rencanaAkhir"
-            value={formData.rencanaAkhir || ''}
+            value={localFormData.rencanaAkhir || ''}
             onChange={handleInputChange}
             disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -497,7 +496,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         </label>
         <select
           name="penempatanPKL"
-          value={formData.penempatanPKL || ''}
+          value={localFormData.penempatanPKL || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
@@ -560,7 +559,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         </label>
         <textarea
           name="riwayatPenyakit"
-          value={formData.riwayatPenyakit || ''}
+          value={localFormData.riwayatPenyakit || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           rows={4}
@@ -583,7 +582,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
         </label>
         <textarea
           name="penangananKhusus"
-          value={formData.penangananKhusus || ''}
+          value={localFormData.penangananKhusus || ''}
           onChange={handleInputChange}
           disabled={!isEditing}
           rows={3}
