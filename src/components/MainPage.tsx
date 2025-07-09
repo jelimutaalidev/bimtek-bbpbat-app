@@ -38,7 +38,8 @@ const globalState = {
     userType: 'pelajar' as 'pelajar' | 'umum' // 'pelajar' atau 'umum'
   },
   uploadedFiles: {} as Record<string, File | null>,
-  paymentFile: null as File | null, // Untuk menyimpan file bukti pembayaran
+  paymentFile: null as File | null, // Untuk menyimpan file bukti pembayaran - PERSISTENT
+  paymentFileBackup: null as File | null, // Backup untuk recovery
   profileData: {
     // Personal Info - Hanya nama dan institusi yang terisi dari pendaftaran
     namaLengkap: 'John Doe', // Dari pendaftaran
@@ -138,10 +139,25 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
   };
 
   const updatePaymentFile = (file: File | null) => {
+    // Store backup before updating
+    if (globalState.paymentFile && file !== null) {
+      globalState.paymentFileBackup = globalState.paymentFile;
+    }
+    
+    // Update main file
     globalState.paymentFile = file;
+    
     // Update payment completion status based on file presence
     const isPaymentComplete = file !== null;
     globalState.userData.paymentComplete = isPaymentComplete;
+    
+    // Log for debugging
+    console.log('Payment file updated:', {
+      fileName: file ? file.name : 'null',
+      fileSize: file ? file.size : 0,
+      paymentComplete: isPaymentComplete,
+      timestamp: new Date().toISOString()
+    });
   };
   const studentMenuItems = [
     {

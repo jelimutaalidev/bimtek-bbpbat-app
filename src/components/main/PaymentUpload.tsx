@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CreditCard, Upload, CheckCircle, AlertCircle, X, Download, Info } from 'lucide-react';
 
 interface PaymentUploadProps {
@@ -19,17 +19,36 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
   updateUserData, 
   updatePaymentFile 
 }) => {
+  // Local state untuk UI feedback
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  
+  // Ref untuk menyimpan file secara persisten
+  const fileRef = useRef<File | null>(paymentFile);
+  const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync payment completion status with file presence
+  // Update ref setiap kali paymentFile berubah
   useEffect(() => {
-    const isComplete = paymentFile !== null;
+    fileRef.current = paymentFile;
+  }, [paymentFile]);
+
+  // Sync payment completion status dengan file presence
+  useEffect(() => {
+    const isComplete = fileRef.current !== null;
     if (userData.paymentComplete !== isComplete) {
       updateUserData({ paymentComplete: isComplete });
     }
   }, [paymentFile, userData.paymentComplete, updateUserData]);
+
+  // Clear message timeout saat component unmount
+  useEffect(() => {
+    return () => {
+      if (messageTimeoutRef.current) {
+        clearTimeout(messageTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const validateFile = (file: File): string | null => {
     // Validate file size (max 5MB)
@@ -46,6 +65,21 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
     return null;
   };
 
+  const setMessageWithTimeout = (message: string, timeout: number = 5000) => {
+    // Clear existing timeout
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+    }
+    
+    setUploadMessage(message);
+    
+    // Set new timeout
+    messageTimeoutRef.current = setTimeout(() => {
+      setUploadMessage('');
+      messageTimeoutRef.current = null;
+    }, timeout);
+  };
+
   const processFileUpload = (file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
@@ -56,20 +90,29 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
     setIsUploading(true);
     setUploadMessage('');
 
-    // Simulate upload process with more realistic timing
+    // Clear any existing timeout
+    if (messageTimeoutRef.current) {
+      clearTimeout(messageTimeoutRef.current);
+      messageTimeoutRef.current = null;
+    }
+
+    // Simulate upload process
     setTimeout(() => {
       try {
-        updatePaymentFile(file);
-        setIsUploading(false);
-        setUploadMessage('Bukti pembayaran berhasil diunggah!');
+        // Update ref immediately
+        fileRef.current = file;
         
-        // Clear success message after 5 seconds
-        setTimeout(() => {
-          setUploadMessage('');
-        }, 5000);
-      } catch (error) {
+        // Update global state
+        updatePaymentFile(file);
+        
         setIsUploading(false);
-        alert('Terjadi kesalahan saat mengunggah file. Silakan coba lagi.');
+        setMessageWithTimeout('Bukti pembayaran berhasil diunggah!', 5000);
+        
+        console.log('File uploaded successfully:', file.name);
+      } catch (error) {
+        console.error('Upload error:', error);
+        setIsUploading(false);
+        setMessageWithTimeout('Terjadi kesalahan saat mengunggah file. Silakan coba lagi.', 5000);
       }
     }, 2000);
   };
@@ -108,28 +151,32 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
 
   const handleRemoveFile = () => {
     if (confirm('Apakah Anda yakin ingin menghapus bukti pembayaran ini?')) {
-      updatePaymentFile(null);
-      setUploadMessage('File bukti pembayaran telah dihapus');
+      // Clear ref
+      fileRef.current = null;
       
-      // Clear message after 3 seconds
-      setTimeout(() => {
-        setUploadMessage('');
-      }, 3000);
+      // Update global state
+      updatePaymentFile(null);
+      
+      setMessageWithTimeout('File bukti pembayaran telah dihapus', 3000);
+      
+      console.log('File removed successfully');
     }
   };
 
   const handleDownload = () => {
-    if (paymentFile) {
+    const currentFile = fileRef.current || paymentFile;
+    if (currentFile) {
       try {
-        const url = URL.createObjectURL(paymentFile);
+        const url = URL.createObjectURL(currentFile);
         const a = document.createElement('a');
         a.href = url;
-        a.download = paymentFile.name;
+        a.download = currentFile.name;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } catch (error) {
+        console.error('Download error:', error);
         alert('Terjadi kesalahan saat mengunduh file');
       }
     }
@@ -142,6 +189,9 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
+
+  // Use ref value as primary source, fallback to prop
+  const currentFile = fileRef.current || paymentFile;
 
   return (
     <div className="space-y-6">
@@ -212,7 +262,7 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
           Bukti Pembayaran
         </h2>
 
-        {paymentFile ? (
+        {currentFile ? (
           /* File Uploaded State */
           <div className="border-2 border-green-200 bg-green-50 rounded-lg p-6">
             <div className="flex items-start justify-between">
@@ -222,10 +272,10 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
                 </div>
                 <div className="flex-1">
                   <p className="font-medium text-green-800 mb-1">File berhasil diunggah</p>
-                  <p className="text-sm text-green-700 mb-1">{paymentFile.name}</p>
+                  <p className="text-sm text-green-700 mb-1">{currentFile.name}</p>
                   <div className="flex items-center gap-4 text-xs text-green-600">
-                    <span>Ukuran: {formatFileSize(paymentFile.size)}</span>
-                    <span>Tipe: {paymentFile.type}</span>
+                    <span>Ukuran: {formatFileSize(currentFile.size)}</span>
+                    <span>Tipe: {currentFile.type}</span>
                     <span>Diupload: {new Date().toLocaleDateString('id-ID')}</span>
                   </div>
                 </div>
@@ -260,7 +310,9 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
               />
               <label
                 htmlFor="replace-payment-upload"
-                className="text-sm text-green-700 hover:text-green-800 cursor-pointer underline"
+                className={`text-sm text-green-700 hover:text-green-800 cursor-pointer underline ${
+                  isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Ganti dengan file lain
               </label>
@@ -310,7 +362,9 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
                 />
                 <label
                   htmlFor="payment-upload"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 cursor-pointer transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 cursor-pointer transition-colors inline-flex items-center gap-2 ${
+                    isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   <Upload className="w-4 h-4" />
                   Pilih File
@@ -378,9 +432,12 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({
         <div className="bg-gray-100 rounded-lg p-4 border border-gray-300">
           <h4 className="text-sm font-medium text-gray-800 mb-2">Debug Info:</h4>
           <div className="text-xs text-gray-600 space-y-1">
-            <p>Payment File: {paymentFile ? paymentFile.name : 'null'}</p>
+            <p>Payment File (prop): {paymentFile ? paymentFile.name : 'null'}</p>
+            <p>Payment File (ref): {fileRef.current ? fileRef.current.name : 'null'}</p>
+            <p>Current File: {currentFile ? currentFile.name : 'null'}</p>
             <p>Payment Complete: {userData.paymentComplete ? 'true' : 'false'}</p>
             <p>Is Uploading: {isUploading ? 'true' : 'false'}</p>
+            <p>Upload Message: {uploadMessage || 'none'}</p>
           </div>
         </div>
       )}
