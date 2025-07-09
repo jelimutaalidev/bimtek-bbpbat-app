@@ -33,28 +33,31 @@ interface ValidationErrors {
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({
-    namaLengkap: 'John Doe',
-    email: 'john.doe@example.com',
-    alamat: 'Jl. Contoh No. 123, Jakarta',
-    noTelepon: '081234567890',
-    namaOrangTua: 'Jane Doe',
-    noTeleponOrangTua: '081234567891',
-    tempatLahir: 'Jakarta',
-    tanggalLahir: '2000-01-01',
-    golonganDarah: 'A',
-    namaInstitusi: 'Universitas Contoh',
-    nomorInduk: '12345678',
-    alamatInstitusi: 'Jl. Kampus No. 456, Jakarta',
-    emailInstitusi: 'info@universitascontoh.ac.id',
-    noTeleponInstitusi: '021-12345678',
-    namaPembimbing: 'Dr. Smith',
-    noTeleponPembimbing: '081234567892',
-    emailPembimbing: 'dr.smith@universitascontoh.ac.id',
-    rencanaMultai: '2024-01-15',
-    rencanaAkhir: '2024-06-15',
-    penempatanPKL: 'PT. Teknologi Maju',
-    riwayatPenyakit: 'Tidak ada',
-    penangananKhusus: 'Tidak ada'
+    // Data yang sudah diisi dari form pendaftaran
+    namaLengkap: 'John Doe', // Dari form pendaftaran
+    namaInstitusi: 'Universitas Padjadjaran', // Dari form pendaftaran
+    noTelepon: '+62 812 3456 7890', // Dari form pendaftaran (nomor WA)
+    namaPembimbing: 'Dr. Ahmad Suryadi', // Dari form pendaftaran
+    noTeleponPembimbing: '+62 813 4567 8901', // Dari form pendaftaran (nomor WA pembimbing)
+    penempatanPKL: 'BIOFLOK NILA', // Dari form pendaftaran (pilihan penempatan)
+    
+    // Data yang belum diisi - perlu dilengkapi user
+    email: '',
+    alamat: '',
+    namaOrangTua: '',
+    noTeleponOrangTua: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+    golonganDarah: '',
+    nomorInduk: '',
+    alamatInstitusi: '',
+    emailInstitusi: '',
+    noTeleponInstitusi: '',
+    emailPembimbing: '',
+    rencanaMultai: '',
+    rencanaAkhir: '',
+    riwayatPenyakit: '',
+    penangananKhusus: ''
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
