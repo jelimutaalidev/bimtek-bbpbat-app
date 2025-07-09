@@ -225,8 +225,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="namaLengkap"
             value={formData.namaLengkap || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaLengkap ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="Masukkan nama lengkap"
           />
@@ -246,8 +248,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="email"
             value={formData.email || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.email ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="john.doe@email.com"
           />
@@ -268,9 +272,11 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           name="alamat"
           value={formData.alamat || ''}
           onChange={handleInputChange}
+          disabled={!isEditing}
           rows={3}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.alamat ? 'border-red-300' : 'border-gray-300'
+          } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           }`}
           placeholder="Masukkan alamat lengkap"
         />
@@ -292,8 +298,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="noTelepon"
             value={formData.noTelepon || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTelepon ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="+62 812 3456 7890"
           />
@@ -313,8 +321,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="namaOrangTua"
             value={formData.namaOrangTua || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaOrangTua ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="Nama orang tua/wali"
           />
@@ -337,8 +347,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="noTeleponOrangTua"
             value={formData.noTeleponOrangTua || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTeleponOrangTua ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="+62 812 3456 7890"
           />
@@ -358,8 +370,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="tempatLahir"
             value={formData.tempatLahir || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.tempatLahir ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="Kota tempat lahir"
           />
@@ -379,8 +393,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="tanggalLahir"
             value={formData.tanggalLahir || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.tanggalLahir ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
           />
           {errors.tanggalLahir && (
@@ -401,8 +417,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="golonganDarah"
             value={formData.golonganDarah || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.golonganDarah ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
           >
             <option value="">Pilih golongan darah</option>
@@ -434,8 +452,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="namaInstitusi"
             value={formData.namaInstitusi || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaInstitusi ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="Nama institusi"
           />
@@ -455,8 +475,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="nomorInduk"
             value={formData.nomorInduk || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.nomorInduk ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="NIS/NIM"
           />
@@ -477,9 +499,11 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           name="alamatInstitusi"
           value={formData.alamatInstitusi || ''}
           onChange={handleInputChange}
+          disabled={!isEditing}
           rows={3}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.alamatInstitusi ? 'border-red-300' : 'border-gray-300'
+          } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           }`}
           placeholder="Alamat lengkap institusi"
         />
@@ -501,8 +525,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="emailInstitusi"
             value={formData.emailInstitusi || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.emailInstitusi ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="email@institusi.ac.id"
           />
@@ -522,8 +548,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="noTeleponInstitusi"
             value={formData.noTeleponInstitusi || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTeleponInstitusi ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="+62 21 1234 5678"
           />
@@ -546,8 +574,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="namaPembimbing"
             value={formData.namaPembimbing || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.namaPembimbing ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="Nama pembimbing"
           />
@@ -567,8 +597,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="noTeleponPembimbing"
             value={formData.noTeleponPembimbing || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.noTeleponPembimbing ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="+62 812 3456 7890"
           />
@@ -588,8 +620,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="emailPembimbing"
             value={formData.emailPembimbing || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.emailPembimbing ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
             placeholder="pembimbing@email.com"
           />
@@ -616,8 +650,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="rencanaMultai"
             value={formData.rencanaMultai || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.rencanaMultai ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
           />
           {errors.rencanaMultai && (
@@ -636,8 +672,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
             name="rencanaAkhir"
             value={formData.rencanaAkhir || ''}
             onChange={handleInputChange}
+            disabled={!isEditing}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
               errors.rencanaAkhir ? 'border-red-300' : 'border-gray-300'
+            } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
             }`}
           />
           {errors.rencanaAkhir && (
@@ -657,8 +695,10 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           name="penempatanPKL"
           value={formData.penempatanPKL || ''}
           onChange={handleInputChange}
+          disabled={!isEditing}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.penempatanPKL ? 'border-red-300' : 'border-gray-300'
+          } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           }`}
         >
           <option value="">Pilih unit penempatan</option>
@@ -718,9 +758,11 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           name="riwayatPenyakit"
           value={formData.riwayatPenyakit || ''}
           onChange={handleInputChange}
+          disabled={!isEditing}
           rows={4}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.riwayatPenyakit ? 'border-red-300' : 'border-gray-300'
+          } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           }`}
           placeholder="Tuliskan riwayat penyakit dalam 2 tahun terakhir. Jika tidak ada, tulis 'Tidak ada'"
         />
@@ -740,9 +782,11 @@ const Profile: React.FC<ProfileProps> = ({ userData, profileData, updateUserData
           name="penangananKhusus"
           value={formData.penangananKhusus || ''}
           onChange={handleInputChange}
+          disabled={!isEditing}
           rows={3}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
             errors.penangananKhusus ? 'border-red-300' : 'border-gray-300'
+          } ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
           }`}
           placeholder="Tuliskan jika ada penanganan khusus yang diperlukan. Jika tidak ada, tulis 'Tidak ada'"
         />
