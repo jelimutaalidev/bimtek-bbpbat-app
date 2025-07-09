@@ -18,6 +18,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+  const [initialProfileData, setInitialProfileData] = useState(profileData);
 
   const tabs = [
     { id: 'personal', label: 'Informasi Pribadi', icon: <User className="w-4 h-4" /> },
@@ -59,13 +60,18 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
   const [formData, setFormData] = useState(profileData);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Sync dengan global state saat component mount
+  // Sync dengan global state saat component mount atau saat tidak editing
   useEffect(() => {
-    setFormData(profileData);
-  }, [profileData]);
+    if (!isEditing) {
+      setFormData(profileData);
+      setInitialProfileData(profileData);
+    }
+  }, [profileData, isEditing]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Only update local state, don't trigger any external updates
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
@@ -159,6 +165,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setTimeout(() => {
       // Update global state only when saving
       updateProfileData(formData);
+      setInitialProfileData(formData);
       
       setIsSaving(false);
       setIsEditing(false);
@@ -179,14 +186,16 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setIsEditing(true);
     setSaveMessage('');
     setErrors({});
+    // Store current state as initial when starting edit
+    setInitialProfileData(formData);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setSaveMessage('');
     setErrors({});
-    // Reset form data to original global state
-    setFormData(profileData);
+    // Reset form data to initial state when editing started
+    setFormData(initialProfileData);
   };
 
   const renderPersonalInfo = () => (
