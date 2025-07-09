@@ -8,11 +8,12 @@ interface PaymentUploadProps {
     profileComplete: boolean;
     paymentComplete: boolean;
   };
+  paymentFile: File | null;
   updateUserData: (data: any) => void;
+  updatePaymentFile: (file: File | null) => void;
 }
 
-const PaymentUpload: React.FC<PaymentUploadProps> = ({ userData, updateUserData }) => {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+const PaymentUpload: React.FC<PaymentUploadProps> = ({ userData, paymentFile, updateUserData, updatePaymentFile }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
 
@@ -37,7 +38,7 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({ userData, updateUserData 
 
       // Simulate upload process
       setTimeout(() => {
-        setUploadedFile(file);
+        updatePaymentFile(file);
         setIsUploading(false);
         setUploadMessage('Bukti pembayaran berhasil diunggah!');
         
@@ -53,17 +54,17 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({ userData, updateUserData 
   };
 
   const handleRemoveFile = () => {
-    setUploadedFile(null);
+    updatePaymentFile(null);
     setUploadMessage('');
     updateUserData({ paymentComplete: false });
   };
 
   const handleDownload = () => {
-    if (uploadedFile) {
-      const url = URL.createObjectURL(uploadedFile);
+    if (paymentFile) {
+      const url = URL.createObjectURL(paymentFile);
       const a = document.createElement('a');
       a.href = url;
-      a.download = uploadedFile.name;
+      a.download = paymentFile.name;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -120,7 +121,7 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({ userData, updateUserData 
           Bukti Pembayaran
         </h2>
 
-        {uploadedFile ? (
+        {paymentFile ? (
           /* File Uploaded State */
           <div className="border-2 border-green-200 bg-green-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
@@ -128,9 +129,9 @@ const PaymentUpload: React.FC<PaymentUploadProps> = ({ userData, updateUserData 
                 <CheckCircle className="w-8 h-8 text-green-600" />
                 <div>
                   <p className="font-medium text-green-800">File berhasil diunggah</p>
-                  <p className="text-sm text-green-700">{uploadedFile.name}</p>
+                  <p className="text-sm text-green-700">{paymentFile.name}</p>
                   <p className="text-xs text-green-600">
-                    Ukuran: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                    Ukuran: {(paymentFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
               </div>

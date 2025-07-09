@@ -38,6 +38,7 @@ const globalState = {
     userType: 'pelajar' as 'pelajar' | 'umum' // 'pelajar' atau 'umum'
   },
   uploadedFiles: {} as Record<string, File | null>,
+  paymentFile: null as File | null, // Untuk menyimpan file bukti pembayaran
   profileData: {
     // Personal Info - Hanya nama dan institusi yang terisi dari pendaftaran
     namaLengkap: 'John Doe', // Dari pendaftaran
@@ -136,6 +137,9 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
     globalState.generalProfileData = { ...globalState.generalProfileData, ...data };
   };
 
+  const updatePaymentFile = (file: File | null) => {
+    globalState.paymentFile = file;
+  };
   // Menu items untuk pelajar
   const studentMenuItems = [
     {
@@ -223,10 +227,12 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
   const componentProps = {
     userData: globalState.userData,
     uploadedFiles: globalState.uploadedFiles,
+    paymentFile: globalState.paymentFile,
     profileData: userType === 'pelajar' ? globalState.profileData : globalState.generalProfileData,
     updateUserData,
     updateUploadedFiles,
-    updateProfileData: userType === 'pelajar' ? updateProfileData : updateGeneralProfileData
+    updateProfileData: userType === 'pelajar' ? updateProfileData : updateGeneralProfileData,
+    updatePaymentFile
   };
 
   return (
