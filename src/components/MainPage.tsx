@@ -30,8 +30,8 @@ interface MainPageProps {
 // Global state untuk menyimpan data yang persisten
 const globalState = {
   userData: {
-    name: '',
-    institution: '',
+    name: 'John Doe',
+    institution: 'Universitas Padjadjaran',
     profileComplete: false,
     documentsComplete: false,
     paymentComplete: false, // Untuk masyarakat umum
@@ -139,8 +139,10 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
 
   const updatePaymentFile = (file: File | null) => {
     globalState.paymentFile = file;
+    // Update payment completion status based on file presence
+    const isPaymentComplete = file !== null;
+    globalState.userData.paymentComplete = isPaymentComplete;
   };
-  // Menu items untuk pelajar
   const studentMenuItems = [
     {
       id: 'dashboard',
