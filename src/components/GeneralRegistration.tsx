@@ -12,8 +12,7 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
     instansi: '',
     nomerWA: '',
     pilihanPenempatan: '',
-    suratPengajuan: null as File | null,
-    buktiPembayaran: null as File | null
+    suratPengajuan: null as File | null
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -92,9 +91,6 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
       newErrors.suratPengajuan = 'Surat pengajuan wajib diunggah';
     }
 
-    if (!formData.buktiPembayaran) {
-      newErrors.buktiPembayaran = 'Bukti pembayaran wajib diunggah';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -131,14 +127,14 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
   };
 
   const FileUpload = ({ 
-    field, 
+    field,
     label, 
     file, 
     error, 
     accept, 
     description 
   }: {
-    field: 'suratPengajuan' | 'buktiPembayaran';
+    field: 'suratPengajuan';
     label: string;
     file: File | null;
     error?: string;
@@ -178,7 +174,7 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
             <input
               type="file"
               accept={accept}
-              onChange={handleFileChange(field)}
+              onChange={handleFileChange('suratPengajuan')}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
           </div>
@@ -221,14 +217,6 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
           </div>
 
           {/* Payment Info */}
-          <div className="bg-orange-50 rounded-lg p-4 border border-orange-200 mb-8">
-            <h3 className="text-sm font-medium text-orange-800 mb-2">Informasi Pembayaran:</h3>
-            <div className="text-sm text-orange-700 space-y-1">
-              <p><strong>Bank BNI:</strong> 1234567890 a.n. BBPBAT</p>
-              <p><strong>Biaya Pelatihan:</strong> Rp 1.500.000 per peserta</p>
-              <p><strong>Termasuk:</strong> Materi, konsumsi, sertifikat, dan akomodasi</p>
-            </div>
-          </div>
 
           {/* Form */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
@@ -368,15 +356,6 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
                 description="Format yang didukung: PDF, DOC, DOCX (Maksimal 5MB)"
               />
 
-              {/* Upload Bukti Pembayaran */}
-              <FileUpload
-                field="buktiPembayaran"
-                label="Bukti Pembayaran"
-                file={formData.buktiPembayaran}
-                error={errors.buktiPembayaran}
-                accept=".pdf,.jpg,.jpeg,.png"
-                description="Format yang didukung: PDF, JPG, PNG (Maksimal 5MB)"
-              />
 
               {/* Submit Button */}
               <div className="pt-6">
@@ -403,10 +382,8 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
             <h3 className="text-sm font-medium text-blue-800 mb-2">Informasi Penting:</h3>
             <ul className="text-sm text-blue-700 space-y-1">
               <li>• Pastikan semua data yang diisi benar dan lengkap</li>
-              <li>• Bukti pembayaran harus jelas dan terbaca</li>
               <li>• Proses verifikasi akan dilakukan dalam 1-3 hari kerja</li>
               <li>• Anda akan dihubungi via WhatsApp untuk konfirmasi</li>
-              <li>• Pembayaran yang sudah masuk tidak dapat dikembalikan</li>
               <li>• Pilihan penempatan dengan kuota penuh tidak dapat dipilih</li>
             </ul>
           </div>
