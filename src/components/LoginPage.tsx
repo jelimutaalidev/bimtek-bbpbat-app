@@ -87,9 +87,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
       if (userType === 'pelajar') {
         isValidCredentials = formData.username === demoCredentials.pelajar.username && 
                            formData.accessCode === demoCredentials.pelajar.accessCode;
+        // Set user type in localStorage
+        localStorage.setItem('userType', 'pelajar');
       } else if (userType === 'umum') {
         isValidCredentials = formData.username === demoCredentials.umum.username && 
                            formData.accessCode === demoCredentials.umum.accessCode;
+        // Set user type in localStorage
+        localStorage.setItem('userType', 'umum');
       }
 
       if (isValidCredentials) {

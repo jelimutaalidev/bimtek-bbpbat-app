@@ -30,12 +30,12 @@ interface MainPageProps {
 // Global state untuk menyimpan data yang persisten
 const globalState = {
   userData: {
-    name: 'John Doe',
-    institution: 'Universitas Padjadjaran',
+    name: '',
+    institution: '',
     profileComplete: false,
     documentsComplete: false,
     paymentComplete: false, // Untuk masyarakat umum
-    userType: 'pelajar' // 'pelajar' atau 'umum'
+    userType: 'pelajar' as 'pelajar' | 'umum' // 'pelajar' atau 'umum'
   },
   uploadedFiles: {} as Record<string, File | null>,
   profileData: {
@@ -98,10 +98,26 @@ const globalState = {
 const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Get user type from localStorage (set during login)
+  const [userType, setUserType] = useState<'pelajar' | 'umum'>(() => {
+    const savedUserType = localStorage.getItem('userType') as 'pelajar' | 'umum';
+    return savedUserType || 'pelajar';
+  });
 
-  // Deteksi user type berdasarkan localStorage atau context
-  // Untuk demo, kita set manual berdasarkan username yang login
-  const userType = globalState.userData.userType; // 'pelajar' atau 'umum'
+  // Update global state based on user type
+  React.useEffect(() => {
+    globalState.userData.userType = userType;
+    
+    if (userType === 'pelajar') {
+      globalState.userData.name = globalState.profileData.namaLengkap;
+      globalState.userData.institution = globalState.profileData.namaInstitusi;
+    } else {
+      globalState.userData.name = globalState.generalProfileData.namaLengkap;
+      globalState.userData.institution = globalState.generalProfileData.namaInstitusi;
+    }
+  }, [userType]);
+
 
   // Function untuk update global state
   const updateUserData = (newData: Partial<typeof globalState.userData>) => {

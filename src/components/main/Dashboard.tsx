@@ -20,6 +20,9 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
+  // Get user type from localStorage
+  const userType = localStorage.getItem('userType') as 'pelajar' | 'umum' || 'pelajar';
+  
   const stats = [
     {
       title: 'Kehadiran',
@@ -45,48 +48,53 @@ const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
       change: '+2.5',
       changeType: 'positive'
     },
-    {
+    ...(userType === 'pelajar' ? [{
       title: 'Sertifikat',
       value: '0/1',
       icon: <FileText className="w-6 h-6 text-purple-600" />,
       color: 'bg-purple-100',
       change: 'Pending',
       changeType: 'neutral'
-    }
+    }] : [])
   ];
 
+  // Different events for different user types
   const upcomingEvents = [
-    {
+    ...(userType === 'pelajar' ? [{
       title: 'Praktikum Budidaya Ikan',
       date: '2025-01-20',
       time: '08:00 - 12:00',
       location: 'Lab Budidaya',
       type: 'praktikum'
-    },
+    }] : []),
     {
-      title: 'Seminar Teknologi Pakan',
+      title: userType === 'pelajar' ? 'Seminar Teknologi Pakan' : 'Workshop Manajemen Kualitas Air',
       date: '2025-01-22',
       time: '13:00 - 15:00',
-      location: 'Aula BBPBAT',
-      type: 'seminar'
+      location: userType === 'pelajar' ? 'Aula BBPBAT' : 'Ruang Pelatihan',
+      type: userType === 'pelajar' ? 'seminar' : 'workshop'
     },
     {
-      title: 'Evaluasi Tengah Program',
+      title: userType === 'pelajar' ? 'Evaluasi Tengah Program' : 'Sesi Konsultasi Teknis',
       date: '2025-01-25',
       time: '09:00 - 11:00',
-      location: 'Ruang Ujian',
-      type: 'evaluasi'
+      location: userType === 'pelajar' ? 'Ruang Ujian' : 'Ruang Konsultasi',
+      type: userType === 'pelajar' ? 'evaluasi' : 'konsultasi'
     }
   ];
 
   const recentActivities = [
-    {
+    ...(userType === 'pelajar' ? [{
       title: 'Mengumpulkan Laporan Praktikum',
       time: '2 jam yang lalu',
       type: 'submission'
-    },
+    }] : [{
+      title: 'Upload Bukti Pembayaran',
+      time: '2 jam yang lalu',
+      type: 'payment'
+    }]),
     {
-      title: 'Absen Masuk - Praktikum Pagi',
+      title: userType === 'pelajar' ? 'Absen Masuk - Praktikum Pagi' : 'Absen Masuk - Sesi Pelatihan',
       time: '5 jam yang lalu',
       type: 'attendance'
     },
@@ -107,8 +115,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
       case 'praktikum':
         return 'bg-blue-100 text-blue-800';
       case 'seminar':
+      case 'workshop':
         return 'bg-green-100 text-green-800';
       case 'evaluasi':
+      case 'konsultasi':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -129,15 +139,18 @@ const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-600 rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">
-          Selamat Datang, {userData.name}!
+          Selamat Datang, {userData.name || (userType === 'pelajar' ? 'Peserta Pelajar' : 'Peserta Umum')}!
         </h1>
         <p className="opacity-90">
-          Semangat mengikuti program Bimbingan Teknis BBPBAT hari ini
+          {userType === 'pelajar' 
+            ? 'Semangat mengikuti program PKL BBPBAT hari ini'
+            : 'Semangat mengikuti program Bimbingan Teknis BBPBAT hari ini'
+          }
         </p>
       </div>
 
       {/* Quick Actions */}
-      {(!userData.profileComplete || !userData.documentsComplete) && (
+      {(!userData.profileComplete || (userType === 'pelajar' ? !userData.documentsComplete : !userData.paymentComplete)) && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
@@ -146,7 +159,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
                 Lengkapi Data Anda
               </h3>
               <p className="text-sm text-orange-700 mb-3">
-                Untuk mengakses fitur absensi, laporan, dan sertifikat, silakan lengkapi profil dan berkas wajib terlebih dahulu.
+                {userType === 'pelajar' 
+                  ? 'Untuk mengakses fitur absensi, laporan, dan sertifikat, silakan lengkapi profil dan berkas wajib terlebih dahulu.'
+                  : 'Untuk mengakses fitur sertifikat, silakan lengkapi profil dan upload bukti pembayaran terlebih dahulu.'
+                }
               </p>
               <div className="flex gap-2">
                 {!userData.profileComplete && (
@@ -154,9 +170,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
                     Profil Belum Lengkap
                   </span>
                 )}
-                {!userData.documentsComplete && (
+                {userType === 'pelajar' && !userData.documentsComplete && (
                   <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">
                     Berkas Belum Lengkap
+                  </span>
+                )}
+                {userType === 'umum' && !userData.paymentComplete && (
+                  <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">
+                    Bukti Pembayaran Belum Upload
                   </span>
                 )}
               </div>
@@ -247,21 +268,27 @@ const Dashboard: React.FC<DashboardProps> = ({ userData }) => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Akses Cepat</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-            <BookOpen className="w-6 h-6 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Materi</span>
-          </button>
-          <button className="flex flex-col items-center gap-2 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-            <Clock className="w-6 h-6 text-green-600" />
-            <span className="text-sm font-medium text-green-800">Absensi</span>
-          </button>
-          <button className="flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
-            <FileText className="w-6 h-6 text-orange-600" />
-            <span className="text-sm font-medium text-orange-800">Laporan</span>
-          </button>
+          {userType === 'pelajar' && (
+            <>
+              <button className="flex flex-col items-center gap-2 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                <BookOpen className="w-6 h-6 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">Materi</span>
+              </button>
+              <button className="flex flex-col items-center gap-2 p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+                <FileText className="w-6 h-6 text-orange-600" />
+                <span className="text-sm font-medium text-orange-800">Laporan</span>
+              </button>
+            </>
+          )}
+          {userType === 'umum' && (
+            <button className="flex flex-col items-center gap-2 p-4 bg-teal-50 rounded-lg hover:bg-teal-100 transition-colors">
+              <Users className="w-6 h-6 text-teal-600" />
+              <span className="text-sm font-medium text-teal-800">Pembayaran</span>
+            </button>
+          )}
           <button className="flex flex-col items-center gap-2 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
-            <Users className="w-6 h-6 text-purple-600" />
-            <span className="text-sm font-medium text-purple-800">Forum</span>
+            <Clock className="w-6 h-6 text-purple-600" />
+            <span className="text-sm font-medium text-purple-800">Sertifikat</span>
           </button>
         </div>
       </div>

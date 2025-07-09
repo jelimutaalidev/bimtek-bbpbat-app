@@ -11,8 +11,15 @@ interface CertificateProps {
 }
 
 const Certificate: React.FC<CertificateProps> = ({ userData }) => {
+  // Get user type from localStorage
+  const userType = localStorage.getItem('userType') as 'pelajar' | 'umum' || 'pelajar';
+  
   // Check if profile and documents are complete
-  if (!userData.profileComplete || !userData.documentsComplete) {
+  const canAccess = userType === 'pelajar' 
+    ? userData.profileComplete && userData.documentsComplete
+    : userData.profileComplete && userData.paymentComplete;
+    
+  if (!canAccess) {
     return (
       <div className="space-y-6">
         <div>
@@ -28,7 +35,10 @@ const Certificate: React.FC<CertificateProps> = ({ userData }) => {
                 Akses Terbatas
               </h3>
               <p className="text-orange-700 mb-4">
-                Untuk mengakses fitur sertifikat, Anda harus melengkapi profil dan mengunggah semua berkas wajib terlebih dahulu.
+                {userType === 'pelajar' 
+                  ? 'Untuk mengakses fitur sertifikat, Anda harus melengkapi profil dan mengunggah semua berkas wajib terlebih dahulu.'
+                  : 'Untuk mengakses fitur sertifikat, Anda harus melengkapi profil dan mengunggah bukti pembayaran terlebih dahulu.'
+                }
               </p>
               <div className="flex gap-2">
                 {!userData.profileComplete && (
@@ -36,9 +46,14 @@ const Certificate: React.FC<CertificateProps> = ({ userData }) => {
                     Profil Belum Lengkap
                   </span>
                 )}
-                {!userData.documentsComplete && (
+                {userType === 'pelajar' && !userData.documentsComplete && (
                   <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">
                     Berkas Belum Lengkap
+                  </span>
+                )}
+                {userType === 'umum' && !userData.paymentComplete && (
+                  <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">
+                    Bukti Pembayaran Belum Upload
                   </span>
                 )}
               </div>
