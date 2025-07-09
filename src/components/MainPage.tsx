@@ -9,7 +9,8 @@ import {
   LogOut,
   Menu,
   X,
-  Fish
+  Fish,
+  CreditCard
 } from 'lucide-react';
 import { NavigationState } from '../App';
 import Dashboard from './main/Dashboard';
@@ -18,6 +19,8 @@ import Documents from './main/Documents';
 import Attendance from './main/Attendance';
 import Reports from './main/Reports';
 import Certificate from './main/Certificate';
+import GeneralProfile from './main/GeneralProfile';
+import PaymentUpload from './main/PaymentUpload';
 
 interface MainPageProps {
   onNavigate: (page: NavigationState) => void;
@@ -30,14 +33,16 @@ const globalState = {
     name: 'John Doe',
     institution: 'Universitas Padjadjaran',
     profileComplete: false,
-    documentsComplete: false
+    documentsComplete: false,
+    paymentComplete: false, // Untuk masyarakat umum
+    userType: 'pelajar' // 'pelajar' atau 'umum'
   },
   uploadedFiles: {} as Record<string, File | null>,
   profileData: {
     // Personal Info - Hanya nama dan institusi yang terisi dari pendaftaran
     namaLengkap: 'John Doe', // Dari pendaftaran
     alamat: '',
-    noTelepon: '',
+    noTelepon: '+62 812 3456 7890', // Dari pendaftaran (nomor WA)
     email: '',
     namaOrangTua: '',
     noTeleponOrangTua: '',
@@ -51,16 +56,40 @@ const globalState = {
     alamatInstitusi: '',
     emailInstitusi: '',
     noTeleponInstitusi: '',
-    namaPembimbing: '',
-    noTeleponPembimbing: '',
+    namaPembimbing: 'Dr. Ahmad Suryadi', // Dari pendaftaran
+    noTeleponPembimbing: '+62 813 4567 8901', // Dari pendaftaran (nomor WA pembimbing)
     emailPembimbing: '',
 
     // Internship Plan - Kosong, akan diisi user
     rencanaMultai: '',
     rencanaAkhir: '',
-    penempatanPKL: '',
+    penempatanPKL: 'BIOFLOK NILA', // Dari pendaftaran (pilihan penempatan)
 
     // Health Info - Kosong, akan diisi user
+    riwayatPenyakit: '',
+    penangananKhusus: ''
+  },
+  generalProfileData: {
+    // Personal Info untuk masyarakat umum
+    namaLengkap: 'Ahmad Rahman', // Dari pendaftaran
+    email: '',
+    alamat: '',
+    noTelepon: '+62 816 7890 1234', // Dari pendaftaran (nomor WA)
+    golonganDarah: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+
+    // Institution Info untuk masyarakat umum
+    namaInstitusi: 'Dinas Perikanan Jawa Barat', // Dari pendaftaran
+    alamatInstitusi: '',
+    emailInstitusi: '',
+
+    // Bimtek Plan
+    rencanaMultai: '',
+    rencanaAkhir: '',
+    penempatanPKL: 'PAKAN MANDIRI (BUATAN)', // Dari pendaftaran
+
+    // Health Info
     riwayatPenyakit: '',
     penangananKhusus: ''
   }
@@ -69,6 +98,10 @@ const globalState = {
 const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Deteksi user type berdasarkan localStorage atau context
+  // Untuk demo, kita set manual berdasarkan username yang login
+  const userType = globalState.userData.userType; // 'pelajar' atau 'umum'
 
   // Function untuk update global state
   const updateUserData = (newData: Partial<typeof globalState.userData>) => {
@@ -83,7 +116,12 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
     globalState.profileData = { ...globalState.profileData, ...data };
   };
 
-  const menuItems = [
+  const updateGeneralProfileData = (data: Partial<typeof globalState.generalProfileData>) => {
+    globalState.generalProfileData = { ...globalState.generalProfileData, ...data };
+  };
+
+  // Menu items untuk pelajar
+  const studentMenuItems = [
     {
       id: 'dashboard',
       label: 'Dashboard',
@@ -125,6 +163,36 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
     }
   ];
 
+  // Menu items untuk masyarakat umum
+  const generalMenuItems = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      component: Dashboard
+    },
+    {
+      id: 'profile',
+      label: 'Profil',
+      icon: <User className="w-5 h-5" />,
+      component: GeneralProfile
+    },
+    {
+      id: 'payment',
+      label: 'Upload Bukti Pembayaran',
+      icon: <CreditCard className="w-5 h-5" />,
+      component: PaymentUpload
+    },
+    {
+      id: 'certificate',
+      label: 'Sertifikat',
+      icon: <Award className="w-5 h-5" />,
+      component: Certificate,
+      disabled: !globalState.userData.profileComplete || !globalState.userData.paymentComplete
+    }
+  ];
+
+  const menuItems = userType === 'pelajar' ? studentMenuItems : generalMenuItems;
   const ActiveComponent = menuItems.find(item => item.id === activeMenu)?.component || Dashboard;
 
   const handleMenuClick = (menuId: string) => {
@@ -139,10 +207,10 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
   const componentProps = {
     userData: globalState.userData,
     uploadedFiles: globalState.uploadedFiles,
-    profileData: globalState.profileData,
+    profileData: userType === 'pelajar' ? globalState.profileData : globalState.generalProfileData,
     updateUserData,
     updateUploadedFiles,
-    updateProfileData
+    updateProfileData: userType === 'pelajar' ? updateProfileData : updateGeneralProfileData
   };
 
   return (
@@ -171,8 +239,17 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
               <User className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="font-medium text-gray-800">{globalState.userData.name}</p>
-              <p className="text-sm text-gray-600">{globalState.userData.institution}</p>
+              <p className="font-medium text-gray-800">
+                {userType === 'pelajar' ? globalState.profileData.namaLengkap : globalState.generalProfileData.namaLengkap}
+              </p>
+              <p className="text-sm text-gray-600">
+                {userType === 'pelajar' ? globalState.profileData.namaInstitusi : globalState.generalProfileData.namaInstitusi}
+              </p>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                userType === 'pelajar' ? 'bg-blue-100 text-blue-800' : 'bg-teal-100 text-teal-800'
+              }`}>
+                {userType === 'pelajar' ? 'Pelajar' : 'Masyarakat Umum'}
+              </span>
             </div>
           </div>
         </div>
