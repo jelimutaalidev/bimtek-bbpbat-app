@@ -66,11 +66,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const newFormData = { ...formData, [name]: value };
-    setFormData(newFormData);
-    
-    // Update global state secara real-time
-    updateProfileData(newFormData);
+    setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
     if (errors[name]) {
@@ -161,6 +157,9 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
 
     // Simulate API call
     setTimeout(() => {
+      // Update global state only when saving
+      updateProfileData(formData);
+      
       setIsSaving(false);
       setIsEditing(false);
       setSaveMessage('Profil berhasil disimpan!');
@@ -186,7 +185,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setIsEditing(false);
     setSaveMessage('');
     setErrors({});
-    // Reset form data to global state
+    // Reset form data to original global state
     setFormData(profileData);
   };
 
