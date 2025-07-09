@@ -18,7 +18,11 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
-  const [initialProfileData, setInitialProfileData] = useState(profileData);
+  
+  // Use useRef to store initial data to prevent re-renders
+  const initialProfileDataRef = useRef(profileData);
+  const [formData, setFormData] = useState(profileData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const tabs = [
     { id: 'personal', label: 'Informasi Pribadi', icon: <User className="w-4 h-4" /> },
@@ -57,28 +61,27 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     'KODOK LEMBU'
   ];
 
-  const [formData, setFormData] = useState(profileData);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Sync dengan global state saat component mount atau saat tidak editing
+  // Only sync when component mounts or when explicitly needed
   useEffect(() => {
-    if (!isEditing) {
+    // Only update if we're not currently editing to prevent interference
+    if (!isEditing && JSON.stringify(formData) !== JSON.stringify(profileData)) {
       setFormData(profileData);
-      setInitialProfileData(profileData);
+      initialProfileDataRef.current = profileData;
     }
-  }, [profileData, isEditing]);
+  }, [profileData]); // Remove isEditing from dependencies to prevent unnecessary runs
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // Memoize the input change handler to prevent recreation on every render
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Only update local state, don't trigger any external updates
+    // Pure local state update - no external calls
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-  };
+  }, [errors]); // Only depend on errors, not on formData
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -165,7 +168,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setTimeout(() => {
       // Update global state only when saving
       updateProfileData(formData);
-      setInitialProfileData(formData);
+      initialProfileDataRef.current = formData;
       
       setIsSaving(false);
       setIsEditing(false);
@@ -186,8 +189,8 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setIsEditing(true);
     setSaveMessage('');
     setErrors({});
-    // Store current state as initial when starting edit
-    setInitialProfileData(formData);
+    // Store current state as initial when starting edit using ref
+    initialProfileDataRef.current = { ...formData };
   };
 
   const handleCancel = () => {
@@ -195,408 +198,193 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     setSaveMessage('');
     setErrors({});
     // Reset form data to initial state when editing started
-    setFormData(initialProfileData);
+    setFormData(initialProfileDataRef.current);
   };
+
+  // Memoize input field component to prevent unnecessary re-renders
+  const InputField = useCallback(({ 
+    label, 
+    field, 
+    type = 'text', 
+    icon: Icon 
+  }: { 
+    label: string; 
+    field: keyof typeof formData; 
+    type?: string; 
+    icon: React.ElementType;
+  }) => (
+    <div className="space-y-2">
+      <label className="flex items-center text-sm font-medium text-gray-700">
+        <Icon className="w-4 h-4 mr-2 text-gray-500" />
+        {label}
+      </label>
+      <input
+        type={type}
+        name={field}
+        value={formData[field] || ''}
+        onChange={handleInputChange}
+        disabled={!isEditing}
+        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+          errors[field] ? 'border-red-300' : 'border-gray-300'
+        } ${!isEditing ? 'bg-gray-50' : ''}`}
+        placeholder={`Masukkan ${label.toLowerCase()}`}
+      />
+      {errors[field] && (
+        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+          <AlertCircle className="w-4 h-4" />
+          {errors[field]}
+        </p>
+      )}
+    </div>
+  ), [formData, errors, isEditing, handleInputChange]);
+
+  // Memoize textarea field component
+  const TextAreaField = useCallback(({ 
+    label, 
+    field, 
+    icon: Icon,
+    rows = 3
+  }: { 
+    label: string; 
+    field: keyof typeof formData; 
+    icon: React.ElementType;
+    rows?: number;
+  }) => (
+    <div className="space-y-2">
+      <label className="flex items-center text-sm font-medium text-gray-700">
+        <Icon className="w-4 h-4 mr-2 text-gray-500" />
+        {label}
+      </label>
+      <textarea
+        name={field}
+        value={formData[field] || ''}
+        onChange={handleInputChange}
+        disabled={!isEditing}
+        rows={rows}
+        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none ${
+          errors[field] ? 'border-red-300' : 'border-gray-300'
+        } ${!isEditing ? 'bg-gray-50' : ''}`}
+        placeholder={`Masukkan ${label.toLowerCase()}`}
+      />
+      {errors[field] && (
+        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+          <AlertCircle className="w-4 h-4" />
+          {errors[field]}
+        </p>
+      )}
+    </div>
+  ), [formData, errors, isEditing, handleInputChange]);
+
+  // Memoize select field component
+  const SelectField = useCallback(({ 
+    label, 
+    field, 
+    options,
+    icon: Icon 
+  }: { 
+    label: string; 
+    field: keyof typeof formData; 
+    options: string[] | { value: string; label: string }[];
+    icon: React.ElementType;
+  }) => (
+    <div className="space-y-2">
+      <label className="flex items-center text-sm font-medium text-gray-700">
+        <Icon className="w-4 h-4 mr-2 text-gray-500" />
+        {label}
+      </label>
+      <select
+        name={field}
+        value={formData[field] || ''}
+        onChange={handleInputChange}
+        disabled={!isEditing}
+        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+          errors[field] ? 'border-red-300' : 'border-gray-300'
+        } ${!isEditing ? 'bg-gray-50' : ''}`}
+      >
+        <option value="">Pilih {label.toLowerCase()}</option>
+        {options.map((option, index) => {
+          if (typeof option === 'string') {
+            return <option key={index} value={option}>{option}</option>;
+          } else {
+            return <option key={index} value={option.value}>{option.label}</option>;
+          }
+        })}
+      </select>
+      {errors[field] && (
+        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+          <AlertCircle className="w-4 h-4" />
+          {errors[field]}
+        </p>
+      )}
+    </div>
+  ), [formData, errors, isEditing, handleInputChange]);
 
   const renderPersonalInfo = () => (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Nama Lengkap *
-          </label>
-          <input
-            type="text"
-            name="namaLengkap"
-            value={formData.namaLengkap || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.namaLengkap ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-            placeholder="Masukkan nama lengkap"
-          />
-          {errors.namaLengkap && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.namaLengkap}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email *
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.email ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-            placeholder="john.doe@email.com"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.email}
-            </p>
-          )}
-        </div>
+        <InputField label="Nama Lengkap *" field="namaLengkap" icon={User} />
+        <InputField label="Email *" field="email" type="email" icon={Mail} />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Alamat *
-        </label>
-        <textarea
-          name="alamat"
-          value={formData.alamat || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          rows={3}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.alamat ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-          placeholder="Masukkan alamat lengkap"
-        />
-        {errors.alamat && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.alamat}
-          </p>
-        )}
-      </div>
+      <TextAreaField label="Alamat *" field="alamat" icon={MapPin} />
 
       <div className="grid md:grid-cols-3 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            No Telepon/HP/WA *
-          </label>
-          <input
-            type="tel"
-            name="noTelepon"
-            value={formData.noTelepon || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.noTelepon ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-            placeholder="+62 812 3456 7890"
-          />
-          {errors.noTelepon && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.noTelepon}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tempat Lahir *
-          </label>
-          <input
-            type="text"
-            name="tempatLahir"
-            value={formData.tempatLahir || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.tempatLahir ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-            placeholder="Kota tempat lahir"
-          />
-          {errors.tempatLahir && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.tempatLahir}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tanggal Lahir *
-          </label>
-          <input
-            type="date"
-            name="tanggalLahir"
-            value={formData.tanggalLahir || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.tanggalLahir ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-          />
-          {errors.tanggalLahir && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.tanggalLahir}
-            </p>
-          )}
-        </div>
+        <InputField label="No Telepon/HP/WA *" field="noTelepon" type="tel" icon={Phone} />
+        <InputField label="Tempat Lahir *" field="tempatLahir" icon={MapPin} />
+        <InputField label="Tanggal Lahir *" field="tanggalLahir" type="date" icon={Calendar} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Golongan Darah *
-          </label>
-          <select
-            name="golonganDarah"
-            value={formData.golonganDarah || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.golonganDarah ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-          >
-            <option value="">Pilih golongan darah</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="AB">AB</option>
-            <option value="O">O</option>
-          </select>
-          {errors.golonganDarah && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.golonganDarah}
-            </p>
-          )}
-        </div>
+        <SelectField 
+          label="Golongan Darah *" 
+          field="golonganDarah" 
+          options={['A', 'B', 'AB', 'O']} 
+          icon={Heart} 
+        />
       </div>
     </div>
   );
 
   const renderInstitutionInfo = () => (
     <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Nama Institusi/Perusahaan/Dinas *
-        </label>
-        <input
-          type="text"
-          name="namaInstitusi"
-          value={formData.namaInstitusi || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.namaInstitusi ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-          placeholder="Nama institusi"
-        />
-        {errors.namaInstitusi && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.namaInstitusi}
-          </p>
-        )}
-      </div>
+      <InputField label="Nama Institusi/Perusahaan/Dinas *" field="namaInstitusi" icon={Building} />
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Alamat Institusi *
-        </label>
-        <textarea
-          name="alamatInstitusi"
-          value={formData.alamatInstitusi || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          rows={3}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.alamatInstitusi ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-          placeholder="Alamat lengkap institusi"
-        />
-        {errors.alamatInstitusi && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.alamatInstitusi}
-          </p>
-        )}
-      </div>
+      <TextAreaField label="Alamat Institusi *" field="alamatInstitusi" icon={MapPin} />
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Email Institusi *
-        </label>
-        <input
-          type="email"
-          name="emailInstitusi"
-          value={formData.emailInstitusi || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.emailInstitusi ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-          placeholder="email@institusi.com"
-        />
-        {errors.emailInstitusi && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.emailInstitusi}
-          </p>
-        )}
-      </div>
+      <InputField label="Email Institusi *" field="emailInstitusi" type="email" icon={Mail} />
     </div>
   );
 
   const renderBimtekPlan = () => (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rencana Mulai Bimtek *
-          </label>
-          <input
-            type="date"
-            name="rencanaMultai"
-            value={formData.rencanaMultai || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.rencanaMultai ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-          />
-          {errors.rencanaMultai && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.rencanaMultai}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rencana Akhir Bimtek *
-          </label>
-          <input
-            type="date"
-            name="rencanaAkhir"
-            value={formData.rencanaAkhir || ''}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.rencanaAkhir ? 'border-red-300' : 'border-gray-300'
-            } ${!isEditing ? 'bg-gray-50' : ''}`}
-          />
-          {errors.rencanaAkhir && (
-            <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="w-4 h-4" />
-              {errors.rencanaAkhir}
-            </p>
-          )}
-        </div>
+        <InputField label="Rencana Mulai Bimtek *" field="rencanaMultai" type="date" icon={Calendar} />
+        <InputField label="Rencana Akhir Bimtek *" field="rencanaAkhir" type="date" icon={Calendar} />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Penempatan Bimtek *
-        </label>
-        <select
-          name="penempatanPKL"
-          value={formData.penempatanPKL || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.penempatanPKL ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-        >
-          <option value="">Pilih unit penempatan</option>
-          {placementOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        {errors.penempatanPKL && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.penempatanPKL}
-          </p>
-        )}
-      </div>
+      <SelectField 
+        label="Penempatan Bimtek *" 
+        field="penempatanPKL" 
+        options={placementOptions} 
+        icon={MapPin} 
+      />
     </div>
   );
 
   const renderHealthInfo = () => (
     <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Upload Kartu BPJS Kesehatan (Opsional)
-        </label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <input
-            type="file"
-            accept=".pdf,.jpg,.jpeg,.png"
-            className="hidden"
-            id="bpjs-upload"
-            disabled={!isEditing}
-          />
-          <label
-            htmlFor="bpjs-upload"
-            className={`cursor-pointer ${!isEditing ? 'cursor-not-allowed opacity-50' : ''}`}
-          >
-            <div className="text-gray-400 mb-2">
-              <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-600">
-              Klik untuk mengunggah atau drag & drop
-            </p>
-            <p className="text-xs text-gray-500">
-              Format: PDF, JPG, PNG (Maksimal 5MB)
-            </p>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Riwayat Penyakit (2 tahun terakhir) *
-        </label>
-        <textarea
-          name="riwayatPenyakit"
-          value={formData.riwayatPenyakit || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          rows={4}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.riwayatPenyakit ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-          placeholder="Tuliskan riwayat penyakit dalam 2 tahun terakhir. Jika tidak ada, tulis 'Tidak ada'"
-        />
-        {errors.riwayatPenyakit && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.riwayatPenyakit}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Penanganan Khusus yang Diperlukan *
-        </label>
-        <textarea
-          name="penangananKhusus"
-          value={formData.penangananKhusus || ''}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          rows={3}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            errors.penangananKhusus ? 'border-red-300' : 'border-gray-300'
-          } ${!isEditing ? 'bg-gray-50' : ''}`}
-          placeholder="Tuliskan jika ada penanganan khusus yang diperlukan. Jika tidak ada, tulis 'Tidak ada'"
-        />
-        {errors.penangananKhusus && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            {errors.penangananKhusus}
-          </p>
-        )}
-      </div>
+      <TextAreaField 
+        label="Riwayat Penyakit (2 tahun terakhir) *" 
+        field="riwayatPenyakit" 
+        icon={Heart} 
+        rows={4} 
+      />
+      <TextAreaField 
+        label="Penanganan Khusus yang Diperlukan *" 
+        field="penangananKhusus" 
+        icon={FileText} 
+        rows={3} 
+      />
     </div>
   );
 
