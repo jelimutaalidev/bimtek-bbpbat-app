@@ -28,7 +28,7 @@ interface MainPageProps {
 }
 
 // Global state untuk menyimpan data yang persisten
-const globalState = {
+let globalState = {
   userData: {
     name: 'John Doe',
     institution: 'Universitas Padjadjaran',
@@ -123,19 +123,19 @@ const MainPage: React.FC<MainPageProps> = ({ onNavigate, onLogout }) => {
 
   // Function untuk update global state
   const updateUserData = (newData: Partial<typeof globalState.userData>) => {
-    globalState.userData = { ...globalState.userData, ...newData };
+    Object.assign(globalState.userData, newData);
   };
 
   const updateUploadedFiles = (files: Record<string, File | null>) => {
-    globalState.uploadedFiles = { ...globalState.uploadedFiles, ...files };
+    Object.assign(globalState.uploadedFiles, files);
   };
 
   const updateProfileData = (data: Partial<typeof globalState.profileData>) => {
-    globalState.profileData = { ...globalState.profileData, ...data };
+    Object.assign(globalState.profileData, data);
   };
 
   const updateGeneralProfileData = (data: Partial<typeof globalState.generalProfileData>) => {
-    globalState.generalProfileData = { ...globalState.generalProfileData, ...data };
+    Object.assign(globalState.generalProfileData, data);
   };
 
   const updatePaymentFile = (file: File | null) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Building, Calendar, Heart, Save, Edit, AlertCircle, CheckCircle, Mail, Phone, MapPin } from 'lucide-react';
 
 interface GeneralProfileProps {
@@ -52,7 +52,15 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
   // Local state untuk form - TIDAK terhubung dengan global state saat editing
   const [localFormData, setLocalFormData] = useState(profileData);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Refs untuk menyimpan data secara persisten
   const originalDataRef = useRef(profileData);
+  const isEditingRef = useRef(isEditing);
+  
+  // Update ref saat isEditing berubah
+  useEffect(() => {
+    isEditingRef.current = isEditing;
+  }, [isEditing]);
 
   const tabs = [
     { id: 'personal', label: 'Informasi Pribadi', icon: <User className="w-4 h-4" /> },
@@ -63,14 +71,14 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
 
   // Sync hanya saat tidak editing
   useEffect(() => {
-    if (!isEditing) {
+    if (!isEditingRef.current) {
       setLocalFormData(profileData);
       originalDataRef.current = profileData;
     }
-  }, [profileData, isEditing]);
+  }, [profileData]);
 
-  // Handler untuk input - HANYA update local state
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // Handler untuk input - HANYA update local state - STABLE dengan useCallback
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
     // HANYA update local state, jangan sentuh global state
@@ -80,7 +88,7 @@ const GeneralProfile: React.FC<GeneralProfileProps> = ({ userData, profileData, 
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-  };
+  }, [errors]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
