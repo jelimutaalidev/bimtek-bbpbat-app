@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Users, Building, Eye, Search, Filter, Download, MapPin } from 'lucide-react';
+import { Users, Building, Eye, Search, Filter, Download, MapPin, Calendar, CheckCircle, Clock, Award } from 'lucide-react';
 
 const ParticipantManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('student');
+  const [activeDataType, setActiveDataType] = useState('active');
   const [selectedPlacement, setSelectedPlacement] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
@@ -16,75 +17,236 @@ const ParticipantManagement: React.FC = () => {
     'Perpustakaan', 'Uji Terap Teknik dan Kerjasama', 'Arsip', 'Kepegawaian', 'Koperasi', 'KODOK LEMBU'
   ];
 
-  const studentParticipants = [
-    {
-      id: 1,
-      nama: 'John Doe',
-      instansi: 'Universitas Padjadjaran',
-      penempatan: 'BIOFLOK NILA',
-      status: 'Aktif',
-      tanggalMulai: '2025-01-20',
-      tanggalSelesai: '2025-03-20',
-      profileComplete: true,
-      documentsComplete: true
-    },
-    {
-      id: 2,
-      nama: 'Sarah Wilson',
-      instansi: 'Institut Teknologi Bandung',
-      penempatan: 'LAB KESEHATAN IKAN',
-      status: 'Aktif',
-      tanggalMulai: '2025-01-22',
-      tanggalSelesai: '2025-03-22',
-      profileComplete: false,
-      documentsComplete: true
-    },
-    {
-      id: 3,
-      nama: 'Michael Chen',
-      instansi: 'Universitas Gadjah Mada',
-      penempatan: 'PAKAN MANDIRI (BUATAN)',
-      status: 'Selesai',
-      tanggalMulai: '2024-11-01',
-      tanggalSelesai: '2025-01-01',
-      profileComplete: true,
-      documentsComplete: true
-    }
-  ];
+  const studentParticipants = {
+    active: [
+      {
+        id: 1,
+        nama: 'John Doe',
+        instansi: 'Universitas Padjadjaran',
+        penempatan: 'BIOFLOK NILA',
+        status: 'Aktif',
+        tanggalMulai: '2025-01-20',
+        tanggalSelesai: '2025-03-20',
+        progress: 45,
+        kehadiran: 85,
+        profileComplete: true,
+        documentsComplete: true
+      },
+      {
+        id: 2,
+        nama: 'Sarah Wilson',
+        instansi: 'Institut Teknologi Bandung',
+        penempatan: 'LAB KESEHATAN IKAN',
+        status: 'Aktif',
+        tanggalMulai: '2025-01-22',
+        tanggalSelesai: '2025-03-22',
+        progress: 30,
+        kehadiran: 92,
+        profileComplete: false,
+        documentsComplete: true
+      },
+      {
+        id: 3,
+        nama: 'David Chen',
+        instansi: 'Universitas Brawijaya',
+        penempatan: 'PAKAN MANDIRI (BUATAN)',
+        status: 'Aktif',
+        tanggalMulai: '2025-01-25',
+        tanggalSelesai: '2025-03-25',
+        progress: 20,
+        kehadiran: 88,
+        profileComplete: true,
+        documentsComplete: false
+      }
+    ],
+    completed: [
+      {
+        id: 4,
+        nama: 'Michael Chen',
+        instansi: 'Universitas Gadjah Mada',
+        penempatan: 'PAKAN MANDIRI (BUATAN)',
+        status: 'Selesai',
+        tanggalMulai: '2024-11-01',
+        tanggalSelesai: '2025-01-01',
+        progress: 100,
+        kehadiran: 95,
+        nilaiAkhir: 85,
+        laporanStatus: 'Diterima',
+        profileComplete: true,
+        documentsComplete: true
+      },
+      {
+        id: 5,
+        nama: 'Lisa Anderson',
+        instansi: 'Universitas Brawijaya',
+        penempatan: 'LAB KUALITAS AIR',
+        status: 'Selesai',
+        tanggalMulai: '2024-10-15',
+        tanggalSelesai: '2024-12-15',
+        progress: 100,
+        kehadiran: 90,
+        nilaiAkhir: 78,
+        laporanStatus: 'Direview',
+        profileComplete: true,
+        documentsComplete: true
+      },
+      {
+        id: 6,
+        nama: 'Robert Kim',
+        instansi: 'Institut Pertanian Bogor',
+        penempatan: 'BIOFLOK NILA',
+        status: 'Selesai',
+        tanggalMulai: '2024-09-01',
+        tanggalSelesai: '2024-11-01',
+        progress: 100,
+        kehadiran: 87,
+        nilaiAkhir: 82,
+        laporanStatus: 'Diterima',
+        profileComplete: true,
+        documentsComplete: true
+      }
+    ],
+    graduated: [
+      {
+        id: 7,
+        nama: 'Emma Watson',
+        instansi: 'Universitas Diponegoro',
+        penempatan: 'LAB KESEHATAN IKAN',
+        status: 'Lulus',
+        tanggalMulai: '2024-08-01',
+        tanggalSelesai: '2024-10-01',
+        progress: 100,
+        kehadiran: 98,
+        nilaiAkhir: 90,
+        laporanStatus: 'Diterima',
+        sertifikatStatus: 'Diterbitkan',
+        nomorSertifikat: 'BBPBAT/CERT/2024/001',
+        tanggalLulus: '2024-10-15',
+        profileComplete: true,
+        documentsComplete: true
+      },
+      {
+        id: 8,
+        nama: 'James Wilson',
+        instansi: 'Universitas Hasanuddin',
+        penempatan: 'PEMBENIHAN NILA SULTANA',
+        status: 'Lulus',
+        tanggalMulai: '2024-07-01',
+        tanggalSelesai: '2024-09-01',
+        progress: 100,
+        kehadiran: 96,
+        nilaiAkhir: 88,
+        laporanStatus: 'Diterima',
+        sertifikatStatus: 'Diterbitkan',
+        nomorSertifikat: 'BBPBAT/CERT/2024/002',
+        tanggalLulus: '2024-09-15',
+        profileComplete: true,
+        documentsComplete: true
+      }
+    ]
+  };
 
-  const generalParticipants = [
-    {
-      id: 1,
-      nama: 'Ahmad Rahman',
-      instansi: 'Dinas Perikanan Jawa Barat',
-      penempatan: 'PAKAN MANDIRI (BUATAN)',
-      status: 'Aktif',
-      tanggalMulai: '2025-01-15',
-      tanggalSelesai: '2025-03-15',
-      profileComplete: true,
-      documentsComplete: false
-    },
-    {
-      id: 2,
-      nama: 'Siti Nurhaliza',
-      instansi: 'PT Aqua Nusantara',
-      penempatan: 'LAB KUALITAS AIR',
-      status: 'Aktif',
-      tanggalMulai: '2025-01-18',
-      tanggalSelesai: '2025-03-18',
-      profileComplete: true,
-      documentsComplete: true
-    }
-  ];
+  const generalParticipants = {
+    active: [
+      {
+        id: 1,
+        nama: 'Ahmad Rahman',
+        instansi: 'Dinas Perikanan Jawa Barat',
+        penempatan: 'PAKAN MANDIRI (BUATAN)',
+        status: 'Aktif',
+        tanggalMulai: '2025-01-15',
+        tanggalSelesai: '2025-03-15',
+        progress: 60,
+        kehadiran: 94,
+        profileComplete: true,
+        documentsComplete: true
+      },
+      {
+        id: 2,
+        nama: 'Siti Nurhaliza',
+        instansi: 'PT Aqua Nusantara',
+        penempatan: 'LAB KUALITAS AIR',
+        status: 'Aktif',
+        tanggalMulai: '2025-01-18',
+        tanggalSelesai: '2025-03-18',
+        progress: 40,
+        kehadiran: 89,
+        profileComplete: true,
+        documentsComplete: true
+      }
+    ],
+    completed: [
+      {
+        id: 3,
+        nama: 'Budi Santoso',
+        instansi: 'Dinas Perikanan Jawa Timur',
+        penempatan: 'BIOFLOK NILA',
+        status: 'Selesai',
+        tanggalMulai: '2024-11-01',
+        tanggalSelesai: '2025-01-01',
+        progress: 100,
+        kehadiran: 92,
+        nilaiAkhir: 86,
+        laporanStatus: 'Diterima',
+        profileComplete: true,
+        documentsComplete: true
+      }
+    ],
+    graduated: [
+      {
+        id: 4,
+        nama: 'Dewi Sartika',
+        instansi: 'PT Mina Bahari',
+        penempatan: 'LAB NUTRISI DAN RESIDU',
+        status: 'Lulus',
+        tanggalMulai: '2024-08-01',
+        tanggalSelesai: '2024-10-01',
+        progress: 100,
+        kehadiran: 97,
+        nilaiAkhir: 91,
+        laporanStatus: 'Diterima',
+        sertifikatStatus: 'Diterbitkan',
+        nomorSertifikat: 'BBPBAT/CERT/2024/003',
+        tanggalLulus: '2024-10-20',
+        profileComplete: true,
+        documentsComplete: true
+      }
+    ]
+  };
 
   const tabs = [
     { id: 'student', label: 'Pelajar', icon: <Users className="w-4 h-4" /> },
     { id: 'general', label: 'Masyarakat/Dinas', icon: <Building className="w-4 h-4" /> }
   ];
 
-  const participants = activeTab === 'student' ? studentParticipants : generalParticipants;
+  const dataTypes = [
+    { 
+      id: 'active', 
+      label: 'Data Peserta Aktif', 
+      icon: <Clock className="w-4 h-4" />,
+      color: 'text-blue-600 border-blue-500',
+      bgColor: 'bg-blue-50'
+    },
+    { 
+      id: 'completed', 
+      label: 'Data Peserta Selesai', 
+      icon: <CheckCircle className="w-4 h-4" />,
+      color: 'text-green-600 border-green-500',
+      bgColor: 'bg-green-50'
+    },
+    { 
+      id: 'graduated', 
+      label: 'Data Peserta Lulus', 
+      icon: <Award className="w-4 h-4" />,
+      color: 'text-purple-600 border-purple-500',
+      bgColor: 'bg-purple-50'
+    }
+  ];
 
-  const filteredParticipants = participants.filter(participant => {
+  const participants = activeTab === 'student' ? studentParticipants : generalParticipants;
+  const currentParticipants = participants[activeDataType as keyof typeof participants] || [];
+
+  const filteredParticipants = currentParticipants.filter(participant => {
     const matchesSearch = participant.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          participant.instansi.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPlacement = selectedPlacement === 'all' || participant.penempatan === selectedPlacement;
@@ -97,19 +259,26 @@ const ParticipantManagement: React.FC = () => {
       acc[placement] = participantsInPlacement;
     }
     return acc;
-  }, {} as Record<string, typeof participants>);
+  }, {} as Record<string, typeof currentParticipants>);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Aktif':
-        return 'bg-green-100 text-green-800';
-      case 'Selesai':
         return 'bg-blue-100 text-blue-800';
+      case 'Selesai':
+        return 'bg-green-100 text-green-800';
       case 'Lulus':
         return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getProgressColor = (progress: number) => {
+    if (progress >= 80) return 'bg-green-500';
+    if (progress >= 60) return 'bg-yellow-500';
+    if (progress >= 40) return 'bg-orange-500';
+    return 'bg-red-500';
   };
 
   const mockDetailData = {
@@ -156,12 +325,66 @@ const ParticipantManagement: React.FC = () => {
     }
   };
 
+  const getDataTypeStats = () => {
+    const studentStats = {
+      active: studentParticipants.active.length,
+      completed: studentParticipants.completed.length,
+      graduated: studentParticipants.graduated.length
+    };
+    
+    const generalStats = {
+      active: generalParticipants.active.length,
+      completed: generalParticipants.completed.length,
+      graduated: generalParticipants.graduated.length
+    };
+
+    return activeTab === 'student' ? studentStats : generalStats;
+  };
+
+  const stats = getDataTypeStats();
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Manajemen Data Peserta</h1>
         <p className="text-gray-600">Kelola data lengkap peserta bimbingan teknis</p>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-blue-100 rounded-lg p-2">
+              <Clock className="w-6 h-6 text-blue-600" />
+            </div>
+            <span className="text-sm font-medium text-blue-600">+2 minggu ini</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-1">{stats.active}</h3>
+          <p className="text-gray-600 text-sm">Peserta Aktif</p>
+        </div>
+
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-green-100 rounded-lg p-2">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+            <span className="text-sm font-medium text-green-600">+5 bulan ini</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-1">{stats.completed}</h3>
+          <p className="text-gray-600 text-sm">Peserta Selesai</p>
+        </div>
+
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-purple-100 rounded-lg p-2">
+              <Award className="w-6 h-6 text-purple-600" />
+            </div>
+            <span className="text-sm font-medium text-purple-600">+8 bulan ini</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-1">{stats.graduated}</h3>
+          <p className="text-gray-600 text-sm">Peserta Lulus</p>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -180,6 +403,31 @@ const ParticipantManagement: React.FC = () => {
               >
                 {tab.icon}
                 {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Data Type Tabs */}
+        <div className="border-b border-gray-200 bg-gray-50">
+          <nav className="flex space-x-4 px-6 py-3">
+            {dataTypes.map((dataType) => (
+              <button
+                key={dataType.id}
+                onClick={() => setActiveDataType(dataType.id)}
+                className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition-colors border-2 ${
+                  activeDataType === dataType.id
+                    ? `${dataType.color} ${dataType.bgColor}`
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {dataType.icon}
+                {dataType.label}
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  activeDataType === dataType.id ? 'bg-white/50' : 'bg-gray-200'
+                }`}>
+                  {stats[dataType.id as keyof typeof stats]}
+                </span>
               </button>
             ))}
           </nav>
@@ -241,11 +489,13 @@ const ParticipantManagement: React.FC = () => {
                             Periode
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
+                            Status & Progress
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Kelengkapan
-                          </th>
+                          {activeDataType !== 'active' && (
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Hasil
+                            </th>
+                          )}
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Aksi
                           </th>
@@ -266,16 +516,34 @@ const ParticipantManagement: React.FC = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(participant.status)}`}>
-                                {participant.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex gap-1">
-                                <span className={`w-3 h-3 rounded-full ${participant.profileComplete ? 'bg-green-500' : 'bg-red-500'}`} title="Profil"></span>
-                                <span className={`w-3 h-3 rounded-full ${participant.documentsComplete ? 'bg-green-500' : 'bg-red-500'}`} title="Berkas"></span>
+                              <div className="flex flex-col gap-2">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(participant.status)}`}>
+                                  {participant.status}
+                                </span>
+                                {activeDataType === 'active' && (
+                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div
+                                      className={`h-2 rounded-full ${getProgressColor(participant.progress)}`}
+                                      style={{ width: `${participant.progress}%` }}
+                                    ></div>
+                                  </div>
+                                )}
+                                <div className="text-xs text-gray-500">
+                                  Kehadiran: {participant.kehadiran}%
+                                </div>
                               </div>
                             </td>
+                            {activeDataType !== 'active' && (
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm space-y-1">
+                                  <div>Nilai: <span className="font-medium">{participant.nilaiAkhir}</span></div>
+                                  <div>Laporan: <span className="text-green-600">{participant.laporanStatus}</span></div>
+                                  {activeDataType === 'graduated' && (
+                                    <div>Sertifikat: <span className="text-purple-600">{participant.sertifikatStatus}</span></div>
+                                  )}
+                                </div>
+                              </td>
+                            )}
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <button
                                 onClick={() => setSelectedParticipant(participant)}
@@ -336,23 +604,48 @@ const ParticipantManagement: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-3">Periode PKL</h4>
+                  <h4 className="font-medium text-gray-800 mb-3">Periode & Progress</h4>
                   <div className="space-y-2 text-sm">
                     <div><span className="font-medium">Mulai:</span> {selectedParticipant.tanggalMulai}</div>
                     <div><span className="font-medium">Selesai:</span> {selectedParticipant.tanggalSelesai}</div>
-                    <div><span className="font-medium">Profil Lengkap:</span> 
-                      <span className={`ml-2 ${selectedParticipant.profileComplete ? 'text-green-600' : 'text-red-600'}`}>
-                        {selectedParticipant.profileComplete ? 'Ya' : 'Tidak'}
-                      </span>
-                    </div>
-                    <div><span className="font-medium">Berkas Lengkap:</span> 
-                      <span className={`ml-2 ${selectedParticipant.documentsComplete ? 'text-green-600' : 'text-red-600'}`}>
-                        {selectedParticipant.documentsComplete ? 'Ya' : 'Tidak'}
-                      </span>
-                    </div>
+                    <div><span className="font-medium">Progress:</span> {selectedParticipant.progress}%</div>
+                    <div><span className="font-medium">Kehadiran:</span> {selectedParticipant.kehadiran}%</div>
+                    {selectedParticipant.nilaiAkhir && (
+                      <div><span className="font-medium">Nilai Akhir:</span> {selectedParticipant.nilaiAkhir}</div>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Additional Info for Completed/Graduated */}
+              {(activeDataType === 'completed' || activeDataType === 'graduated') && (
+                <div className="border-t pt-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-medium text-gray-800 mb-3">Status Laporan</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-medium">Status:</span> 
+                          <span className={`ml-2 ${selectedParticipant.laporanStatus === 'Diterima' ? 'text-green-600' : 'text-orange-600'}`}>
+                            {selectedParticipant.laporanStatus}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {activeDataType === 'graduated' && (
+                      <div>
+                        <h4 className="font-medium text-gray-800 mb-3">Informasi Sertifikat</h4>
+                        <div className="space-y-2 text-sm">
+                          <div><span className="font-medium">Status:</span> 
+                            <span className="ml-2 text-purple-600">{selectedParticipant.sertifikatStatus}</span>
+                          </div>
+                          <div><span className="font-medium">Nomor:</span> {selectedParticipant.nomorSertifikat}</div>
+                          <div><span className="font-medium">Tanggal Lulus:</span> {selectedParticipant.tanggalLulus}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Detailed Information Tabs */}
               <div className="border-t pt-6">
@@ -372,8 +665,12 @@ const ParticipantManagement: React.FC = () => {
                     <div className="space-y-2 text-sm">
                       <div><span className="font-medium">Nomor Induk:</span> {mockDetailData.nomorInduk}</div>
                       <div><span className="font-medium">Email Institusi:</span> {mockDetailData.emailInstitusi}</div>
-                      <div><span className="font-medium">Pembimbing:</span> {mockDetailData.namaPembimbing}</div>
-                      <div><span className="font-medium">Email Pembimbing:</span> {mockDetailData.emailPembimbing}</div>
+                      {activeTab === 'student' && (
+                        <>
+                          <div><span className="font-medium">Pembimbing:</span> {mockDetailData.namaPembimbing}</div>
+                          <div><span className="font-medium">Email Pembimbing:</span> {mockDetailData.emailPembimbing}</div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
