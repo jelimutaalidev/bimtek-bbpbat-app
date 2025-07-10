@@ -1,7 +1,7 @@
 {
-  "name": "bbpbat-backend",
+  "name": "conference-backend",
   "version": "1.0.0",
-  "description": "Backend API untuk Sistem Bimbingan Teknis BBPBAT",
+  "description": "Backend for Conference Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,25 +9,17 @@
     "init-db": "node scripts/initDatabase.js",
     "seed": "node scripts/seedData.js"
   },
-  "keywords": ["bbpbat", "api", "backend", "express", "sqlite"],
-  "author": "BBPBAT Development Team",
-  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "helmet": "^7.1.0",
-    "morgan": "^1.10.0",
     "dotenv": "^16.3.1",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "sqlite3": "^5.1.6",
-    "express-validator": "^7.0.1",
-    "express-rate-limit": "^7.1.5",
-    "compression": "^1.7.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.1"
   }
 }
