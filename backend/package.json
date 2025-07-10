@@ -1,7 +1,7 @@
 {
   "name": "conference-backend",
   "version": "1.0.0",
-  "description": "Backend for Conference Management System",
+  "description": "Backend API for Conference Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -21,5 +21,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "keywords": ["conference", "management", "api"],
+  "author": "",
+  "license": "MIT"
 }

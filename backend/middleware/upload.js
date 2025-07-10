@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new Error('Only images and PDF files are allowed'));
+    cb(new Error('Only images (JPEG, JPG, PNG, GIF) and PDF files are allowed'));
   }
 };
 

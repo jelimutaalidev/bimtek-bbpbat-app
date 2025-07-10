@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const database = require('../config/database');
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -24,4 +25,15 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticateToken, requireAdmin };
+const requireParticipant = (req, res, next) => {
+  if (req.user.role !== 'participant' && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Participant access required' });
+  }
+  next();
+};
+
+module.exports = {
+  authenticateToken,
+  requireAdmin,
+  requireParticipant
+};
