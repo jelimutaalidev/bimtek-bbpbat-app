@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Shield, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { NavigationState } from '../../App';
+import { useAuth } from '../../hooks/useAuth';
 
 interface AdminLoginPageProps {
   onNavigate: (page: NavigationState) => void;
@@ -9,18 +10,13 @@ interface AdminLoginPageProps {
 
 const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate, onLogin }) => {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // Demo admin credentials
-  const adminCredentials = {
-    username: 'admin_bbpbat',
-    password: 'AdminBBPBAT2025!'
-  };
+  const { login } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,8 +29,10 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate, onLogin }) 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.username.trim()) {
-      newErrors.username = 'Username wajib diisi';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email wajib diisi';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Format email tidak valid';
     }
 
     if (!formData.password.trim()) {
@@ -54,19 +52,27 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate, onLogin }) 
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.username === adminCredentials.username && 
-          formData.password === adminCredentials.password) {
+    try {
+      const result = await login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (result.success && result.user?.role === 'admin') {
         onLogin(true);
         onNavigate('admin-main');
       } else {
         setErrors({
-          general: 'Username atau password tidak valid'
+          general: result.error || 'Login gagal atau Anda bukan admin'
         });
       }
+    } catch (error) {
+      setErrors({
+        general: 'Terjadi kesalahan jaringan'
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -116,10 +122,10 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate, onLogin }) 
 
           {/* Demo Credentials Info */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-6">
-            <h3 className="text-sm font-medium text-gray-800 mb-2">Demo Admin Credentials:</h3>
+            <h3 className="text-sm font-medium text-gray-800 mb-2">Demo Admin Account:</h3>
             <div className="text-sm text-gray-700 space-y-1">
-              <p><strong>Username:</strong> admin_bbpbat</p>
-              <p><strong>Password:</strong> AdminBBPBAT2025!</p>
+              <p><strong>Email:</strong> admin@conference.com</p>
+              <p><strong>Password:</strong> admin123</p>
             </div>
           </div>
 
@@ -136,26 +142,26 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onNavigate, onLogin }) 
                 </div>
               )}
 
-              {/* Username */}
+              {/* Email */}
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                  Username Admin *
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Admin *
                 </label>
                 <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
-                    errors.username ? 'border-red-300' : 'border-gray-300'
+                    errors.email ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Masukkan username admin"
+                  placeholder="Masukkan email admin"
                 />
-                {errors.username && (
+                {errors.email && (
                   <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
-                    {errors.username}
+                    {errors.email}
                   </p>
                 )}
               </div>

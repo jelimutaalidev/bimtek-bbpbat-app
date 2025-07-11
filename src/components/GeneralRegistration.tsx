@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { NavigationState } from '../App';
+import { registrationService } from '../services/registration';
 
 interface GeneralRegistrationProps {
   onNavigate: (page: NavigationState) => void;
@@ -105,11 +106,20 @@ const GeneralRegistration: React.FC<GeneralRegistrationProps> = ({ onNavigate })
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await registrationService.submitGeneralRegistration(formData);
+      
+      if (response.success) {
+        alert('Pendaftaran berhasil dikirim! Anda akan dihubungi melalui WhatsApp untuk konfirmasi.');
+        onNavigate('home');
+      } else {
+        alert('Gagal mengirim pendaftaran: ' + (response.error || 'Terjadi kesalahan'));
+      }
+    } catch (error) {
+      alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
+    } finally {
       setIsSubmitting(false);
-      onNavigate('home');
-    }, 2000);
+    }
   };
 
   const removeFile = (field: 'suratPengajuan' | 'buktiPembayaran') => {
