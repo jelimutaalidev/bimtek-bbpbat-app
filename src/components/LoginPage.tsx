@@ -219,8 +219,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
                 </h3>
                 <p className="text-sm text-orange-700">
                   Username dan kode akses akan dikirim melalui WhatsApp setelah pengajuan pendaftaran Anda diterima oleh admin. 
-                Akun akan dibuat setelah pengajuan pendaftaran Anda diterima oleh admin. 
-                Informasi login akan dikirim melalui WhatsApp.
+                  Akun akan dibuat setelah pengajuan pendaftaran Anda diterima oleh admin. 
+                  Informasi login akan dikirim melalui WhatsApp.
+                </p>
               </div>
             </div>
           </div>
