@@ -222,6 +222,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onLogin }) => {
                   Akun akan dibuat setelah pengajuan pendaftaran Anda diterima oleh admin. 
                   Informasi login akan dikirim melalui WhatsApp.
                 </p>
+                </p>
               </div>
             </div>
           </div>
